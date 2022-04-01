@@ -2,24 +2,24 @@ use yew::prelude::*;
 use yew::virtual_dom::VNode;
 use yew_router::prelude::*;
 
-use super::connect_4_side::Connect4Side;
+use super::toot_otto_side::TootOttoSide;
 use crate::AppRoute;
 
 pub enum Msg {
     
 }
 
-pub struct Connect4 {
+pub struct TootOtto {
     
 }
 
 
-impl Component for Connect4 {
+impl Component for TootOtto {
     type Message = Msg;
     type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
-        Connect4{}
+        TootOtto{}
     }
 
 
@@ -42,7 +42,6 @@ impl Component for Connect4 {
                         <Link<AppRoute> to={AppRoute::HowToC4}>{ "How to Play Connect4" }</Link<AppRoute>>
                         <Link<AppRoute> to={AppRoute::Connect4}>{ "Play Connect4 With Computer" }</Link<AppRoute>>
                         <Link<AppRoute> to={AppRoute::TootOtto}>{ "Play TOOT-OTTO With Computer" }</Link<AppRoute>>
-
                     
                     </nav>
                     <header class="w3-container w3-top w3-hide-large w3-red w3-xlarge w3-padding">
@@ -54,7 +53,7 @@ impl Component for Connect4 {
                     
                 {
                     html !{
-                        <Connect4Side/>
+                        <TootOttoSide/>
                     }
                 }
                 </div>

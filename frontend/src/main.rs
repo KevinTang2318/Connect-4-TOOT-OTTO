@@ -4,7 +4,7 @@ use yew::virtual_dom::VNode;
 use yew_router::prelude::*;
 
 mod pages;
-use pages::{welcome::Main, connect_4::Connect4, how_to_c4::HowToC4};
+use pages::{welcome::Main, connect_4::Connect4, how_to_c4::HowToC4, toot_otto::TootOtto};
 
 
 pub enum Msg {
@@ -23,6 +23,9 @@ pub enum AppRoute {
     Connect4,
     #[at("/HowToConnect4")]
     HowToC4,
+    #[at("/TootOttoComputer")]
+    TootOtto,
+
 }
 
 
@@ -58,6 +61,7 @@ pub fn switch(routes: &AppRoute) -> Html {
         AppRoute::Main => { html! { <Main/> } },
         AppRoute::Connect4 => { html! { <Connect4/> } },
         AppRoute::HowToC4 => { html! { <HowToC4/> } },
+        AppRoute::TootOtto => { html! { <TootOtto/> } },
         _ => {html! { <Main/> } },
     }
 }        

@@ -43,6 +43,8 @@ impl Component for HowToC4 {
                     </div>
                     <Link<AppRoute> to={AppRoute::HowToC4}>{ "How to Play Connect4" }</Link<AppRoute>>
                     <Link<AppRoute> to={AppRoute::Connect4}>{ "Play Connect4 With Computer" }</Link<AppRoute>>
+                    <Link<AppRoute> to={AppRoute::TootOtto}>{ "Play TOOT-OTTO With Computer" }</Link<AppRoute>>
+
                 
                 </nav>
                 <header class="w3-container w3-top w3-hide-large w3-red w3-xlarge w3-padding">
