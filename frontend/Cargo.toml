@@ -25,6 +25,8 @@ features = [
   "CanvasRenderingContext2d",
   "HtmlCanvasElement",
   "TextMetrics",
-  "ImageData",
-  "ImageBitmap"
+  "console",
+  "HtmlElement",
+  "MouseEvent",
+  "DomRect",
 ]

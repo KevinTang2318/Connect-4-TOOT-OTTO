@@ -1,7 +1,7 @@
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
 
-use super::connect_4_canvas::CanvasModel;
+use super::connect_4_canvas::Connect4Canvas;
 
 pub enum Msg {
     
@@ -48,7 +48,7 @@ impl Component for Connect4Side {
                 </div>
                 <div style="display: block">
                     <br/>
-                    <CanvasModel  
+                    <Connect4Canvas  
                         canvas_id = "connect_computer" 
                         player1 = "Kevin" 
                         player2 = "Computer" 

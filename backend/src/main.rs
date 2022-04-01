@@ -63,7 +63,7 @@ fn post(game_json: Json<Game>, collection: State<Collection<Game>>) {
     if let game = game_json.into_inner() {
         collection.insert_one(game, None).unwrap();
     }
-
+    
 }
 
 fn rocket() -> Result<rocket::Rocket, mongodb::error::Error> { 
