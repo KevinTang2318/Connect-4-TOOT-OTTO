@@ -1,1 +1,1 @@
-export function __cargo_web_snippet_0697c33ed032f3d124c5df7ec170a4ff2362cd8c(Module, $0, $1) { $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){return($1).getCoalescedEvents();})()); }
+export function __cargo_web_snippet_09a1006668a7b267661ed1b3bfe979f57186bad3(Module, $0) { var o = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (o instanceof Event && o.type === "selectionchange"); }

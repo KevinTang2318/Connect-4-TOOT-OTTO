@@ -1,0 +1,1 @@
+export function __cargo_web_snippet_77c7f20d9ad1903cb1faad4b79591e5576426760(Module, $0) { Module.STDWEB_PRIVATE.from_js($0, (function(){return Math.random();})()); }

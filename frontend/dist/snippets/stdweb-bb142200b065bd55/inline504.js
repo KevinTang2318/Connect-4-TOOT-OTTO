@@ -1,1 +1,1 @@
-export function __cargo_web_snippet_08f396b78129ae3241d013deb0f1e6e090a8b264(Module, $0) { var o = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (o instanceof PointerEvent && o.type === "pointerup"); }
+export function __cargo_web_snippet_0ccca4bbb82101e0bf528c1c6ae321016692d573(Module, $0) { var o = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (o instanceof ShadowRoot); }

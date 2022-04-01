@@ -6,8 +6,8 @@ use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::{
     window, CanvasRenderingContext2d, HtmlCanvasElement, MouseEvent, HtmlElement
 };
-
-use std::{thread, time};
+use stdweb::js;
+use stdweb::unstable::TryInto;
 
 use super::connect_4_side::Difficulty;
 
@@ -19,6 +19,10 @@ pub struct Connect4Canvas {
     on_click_cb: Callback<MouseEvent>,
     animation_cb: Closure<dyn FnMut()>,
     plate_position: PlatePosition,
+    current_move: i64,
+    won: bool,
+    paused: bool,
+    reject_click: bool,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -27,7 +31,6 @@ pub struct GameProperty {
     pub player2: Option<String>,
     pub difficulty: Difficulty,
     pub canvas_id: Option<String>,
-    // pub game_end_callback: Callback<i64>,
 }
 
 // This struct is used to store the plate destination and current location
@@ -37,6 +40,7 @@ pub struct PlatePosition {
     pub row: usize,
     pub col: usize,
     pub current_pos: usize,
+    mode: bool,
 }
 
 pub enum Msg {
@@ -46,6 +50,321 @@ pub enum Msg {
 }
 
 impl Connect4Canvas {
+    //-------------------------------------------------------------- Game Algorithm -------------------------------------------------------------------- 
+    // Same as the checkState function in Connect4App.js
+    fn check_state(&self, state: &Vec<Vec<i64>>) -> (i64, i64) {
+        let mut win_val = 0;
+        let mut chain_val = 0;
+        let mut temp_r = 0;
+        let mut temp_b = 0;
+        let mut temp_br = 0;
+        let mut temp_tr = 0;
+
+        for i in 0..6 {
+            for j in 0..7 {
+                temp_r = 0;
+                temp_b = 0;
+                temp_br = 0;
+                temp_tr = 0;
+                for k in 0..=3 {
+                    if j + k < 7 {
+                        temp_r += state[i][j + k];
+                    }
+
+                    if i + k < 6 {
+                        temp_b += state[i + k][j];
+                    }
+
+                    if i + k < 6 && j + k < 7 {
+                        temp_br += state[i + k][j + k];
+                    }
+
+                    if i >= k && j + k < 7 {
+                        temp_tr += state[i - k][j + k];
+                    }
+                }
+                chain_val += temp_r * temp_r * temp_r;
+                chain_val += temp_b * temp_b * temp_b;
+                chain_val += temp_br * temp_br * temp_br;
+                chain_val += temp_tr * temp_tr * temp_tr;
+
+                if temp_r.abs() == 4 {
+                    win_val = temp_r;
+                } 
+                else if temp_b.abs() == 4 {
+                    win_val = temp_b;
+                } 
+                else if temp_br.abs() == 4 {
+                    win_val = temp_br;
+                } 
+                else if temp_tr.abs() == 4 {
+                    win_val = temp_tr;
+                }
+            }
+        }
+
+        return (win_val, chain_val);
+    }
+
+    // Same as the playerMove function in Connect4App.js
+    fn player_move(&self) -> i64 {
+        if self.current_move % 2 == 0 {
+            return 1;
+        }
+        return -1;
+    }
+
+    fn check(&mut self) {
+        let mut temp_r = 0;
+        let mut temp_b = 0;
+        let mut temp_br = 0;
+        let mut temp_tr = 0;
+
+        for i in 0..6 {
+            for j in 0..7 {
+                temp_r = 0;
+                temp_b = 0;
+                temp_br = 0;
+                temp_tr = 0;
+                for k in 0..=3 {
+                    if j + k < 7 {
+                        temp_r += self.board[i][j + k];
+                    }
+
+                    if i + k < 6 {
+                        temp_b += self.board[i + k][j];
+                    }
+
+                    if i + k < 6 && j + k < 7 {
+                        temp_br += self.board[i + k][j + k];
+                    }
+
+                    if i >= k && j + k < 7 {
+                        temp_tr += self.board[i - k][j + k];
+                    }
+                }
+                if temp_r.abs() == 4 {
+                    self.win(temp_r);
+                } 
+                else if temp_b.abs() == 4 {
+                    self.win(temp_b);
+                } 
+                else if temp_br.abs() == 4 {
+                    self.win(temp_br);
+                } 
+                else if temp_tr.abs() == 4 {
+                    self.win(temp_tr);
+                }
+            }
+        }
+
+        // check if draw
+        if (self.current_move == 42) && (!self.won) {
+            self.win(0);
+        }
+    }
+
+    fn win(&mut self, player: i64) {
+        self.paused = true;
+        self.won = true;
+        // self.reject_click = false;
+
+        let mut msg = String::new();
+        if player > 0 {
+            msg = format!("{} wins", self.props.player1.as_ref().unwrap());
+        } else if player < 0 {
+            msg = format!("{} wins", self.props.player2.as_ref().unwrap());
+        } else {
+            msg = "It's a draw".to_string();
+        }
+
+        let to_print = format!("{} - Click on game board to reset", msg);
+
+        gloo::console::log!(to_print);
+
+        //TODO: construct DB data
+    }
+
+    // The fillMap function in Connect4App.js
+    fn fill_map(&self, state: &Vec<Vec<i64>>, column: usize, value: i64) -> Option<Vec<Vec<i64>>> {
+        let mut temp_map = state.clone();
+        if temp_map[0][column] != 0 || column > 6 {
+            return None;
+        }
+
+        let mut done = false;
+        let mut row = 0;
+
+        for i in 0..5 {
+            if temp_map[i + 1][column] != 0 {
+                done = true;
+                row = i;
+                break;
+            }
+        }
+        if !done {
+            row = 5;
+        }
+
+        temp_map[row][column] = value;
+        return Some(temp_map);
+    }
+
+    // The MiniMax Algorithm with alpha beta pruning
+    fn value(&self, state: &Vec<Vec<i64>>, depth: i64, mut alpha: i64, mut beta: i64, ai_move_value: i64) -> (i64, i64) {
+        let val = self.check_state(state);
+
+        let max_depth = match self.props.difficulty {
+            Easy => 1,
+            Medium => 3,
+            Hard => 5
+        };
+
+        if depth >= max_depth {
+            let mut ret_val = 0;
+
+            // if win, value = +inf
+            let win_val = val.0;
+            let chain_val = val.1 * ai_move_value;
+            ret_val = chain_val;
+
+            // If it lead to winning, then do it
+            if win_val == 4 * ai_move_value {
+                // AI win, AI wants to win of course
+                ret_val = 999999 - depth * depth;
+            } else if win_val == 4 * ai_move_value * -1 {
+                // AI lose, AI hates losing
+                ret_val = 999999 * -1 - depth * depth;
+            }
+
+            return (ret_val, -1);
+        }
+
+        let win = val.0;
+        // if already won, then return the value right away
+        if win == 4 * ai_move_value {
+            // AI win, AI wants to win of course
+            return (999999 - depth * depth, -1);
+        }
+        if win == 4 * ai_move_value * -1 {
+            // AI lose, AI hates losing
+            return (999999 * -1 - depth * depth, -1);
+        }
+
+        if depth % 2 == 0 {
+            return self.min_state(state, depth + 1, alpha, beta, ai_move_value);
+        }
+        return self.max_state(state, depth + 1, alpha, beta, ai_move_value,);
+    }
+
+    // The choose function in Connect4App.js
+    fn choose(&self, choice: &Vec<usize>) -> i64 {
+        let index = self.get_random_val(choice.len());
+        return choice[index] as i64;
+    }
+
+    fn get_random_val(&self, val: usize) -> usize {
+        let rand = js! { return Math.random(); };
+        let base: f64 = stdweb::unstable::TryInto::try_into(rand).unwrap();
+        let max_val = val as f64;
+
+        return (base * max_val).floor() as usize;
+    }
+
+    // The maxState function in Connect4App.js
+    fn max_state(&self, state: &Vec<Vec<i64>>, depth: i64, mut alpha: i64, mut beta: i64, ai_move_value: i64) -> (i64, i64){
+        let mut v = -100000000007;
+        let mut new_move: i64 = -1;
+        let mut move_queue = Vec::new();
+
+        for j in 0..7 {
+            let temp_state_option = self.fill_map(state, j, ai_move_value);
+
+            if let Some(temp_state) = temp_state_option {
+                let temp_val = self.value(&temp_state, depth, alpha, beta, ai_move_value);
+
+                gloo::console::log!(&format!("Max temp_val.0: {}", temp_val.0));
+
+                if temp_val.0 > v {
+                    v = temp_val.0;
+                    new_move = j as i64;
+                    move_queue = Vec::new();
+                    move_queue.push(j);
+                } 
+                else if temp_val.0 == v {
+                    move_queue.push(j);
+                }
+
+                // alpha-beta pruning
+                if v > beta {
+                    new_move = self.choose(&move_queue);
+                    return (v, new_move);
+                }
+                alpha = std::cmp::max(alpha, v);
+            }
+        }
+        new_move = self.choose(&move_queue);
+
+        return (v, new_move);
+    }
+
+    fn min_state(&self, state: &Vec<Vec<i64>>, depth: i64, mut alpha: i64, mut beta: i64, ai_move_value: i64) -> (i64, i64){
+        let mut v = 100000000007;
+        let mut new_move: i64 = -1;
+        let mut move_queue = Vec::new();
+
+        for j in 0..7 {
+            let temp_state_option = self.fill_map(state, j, ai_move_value);
+
+            if let Some(temp_state) = temp_state_option {
+                let temp_val = self.value(&temp_state, depth, alpha, beta, ai_move_value);
+
+                gloo::console::log!(&format!("Min temp_val.0: {}", temp_val.0));
+
+                if temp_val.0 < v {
+                    v = temp_val.0;
+                    new_move = j as i64;
+                    move_queue = Vec::new();
+                    move_queue.push(j);
+                } 
+                else if temp_val.0 == v {
+                    move_queue.push(j);
+                }
+
+                // alpha-beta pruning
+                if v < alpha {
+                    new_move = self.choose(&move_queue);
+                    return (v, new_move);
+                }
+                beta = std::cmp::max(beta, v);
+            }
+        }
+        new_move = self.choose(&move_queue);
+
+        return (v, new_move);
+    }
+
+    pub fn ai(&mut self, ai_move_value: i64) {
+        let new_map = self.board.clone();
+        let val_choice = self.max_state(&new_map, 0, -100000000007, 100000000007, ai_move_value);
+
+        let val = val_choice.0;
+        let choice = val_choice.1;
+
+        self.paused = false;
+        // TODO: Add rejectclick callback
+        let mut done = self.place_plate(choice as usize, true);
+
+        // TODO: Add rejectclick callback
+        while done < 0 {
+            gloo::console::log!("Using random agent");
+            let random_choice = self.get_random_val(7);
+            done = self.place_plate(random_choice, true);
+        }
+    }
+
+
+    //-------------------------------------------------------------- Canvas Related Operations -------------------------------------------------------------
 
     // Determins which column is the current plate placed
     fn in_col(&self, coord: f64, x: f64, radius: f64) -> bool {
@@ -53,16 +372,19 @@ impl Connect4Canvas {
     }
 
     // Place plate in the corresponding column
-    fn place_plate(&mut self, col: usize) {
-
+    fn place_plate(&mut self, col: usize, mode: bool) -> i64 {
+    
         let mut row : usize = 0;
         let mut row_found : bool = false;
 
-        if self.board[row][col] != 0 {
+        if self.paused || self.won {
+            return 0;
+        }
+
+        if self.board[row][col] != 0 || col > 6 {
             // The column is full, cannot add more plates
-            // TODO: add corresponding reactions
             gloo::console::log!("Column full! Connot add more plates!");
-            return;
+            return -1;
         }
 
         // Find the row to place the plate
@@ -77,10 +399,10 @@ impl Connect4Canvas {
             row = 5;
         }
 
-        // Place the plate in the board by placing a 1 in the corresponding array location
-        self.board[row][col] = 1;
+        self.draw_plate_animate(row, col, 0, mode);
 
-        self.draw_plate_animate(row, col, 0);
+        self.paused = true;
+        return 1;
     }
 
     fn draw_board(&self) {
@@ -140,8 +462,15 @@ impl Connect4Canvas {
     }
 
     // Draw the plate with animation (plate slowly dropping)
-    fn draw_plate_animate(&mut self, row: usize, col: usize, current_pos: usize) {
+    fn draw_plate_animate(&mut self, row: usize, col: usize, current_pos: usize, mode: bool) {
         let mut plate_color = "#ff4136";
+
+        if self.current_move >= 1 {
+            plate_color = "#ff4136";
+        }
+        else if self.current_move <= -1  {
+            plate_color = "#ffff00";
+        }
 
         if row * 75 > current_pos {
             // Still in progress of dropping
@@ -154,6 +483,7 @@ impl Connect4Canvas {
             self.plate_position.row = row;
             self.plate_position.col = col;
             self.plate_position.current_pos = current_pos + 25;
+            self.plate_position.mode = mode;
 
             window()
                 .unwrap()
@@ -161,10 +491,20 @@ impl Connect4Canvas {
                 .unwrap();
         }
         else {
-            self.board[row][col] = 1;
+            self.board[row][col] = self.player_move();
+            self.current_move += 1;
             self.clear_board();
             self.draw_game();
             self.draw_board();
+
+            self.check();
+
+            if mode == false && self.props.player2.as_ref().unwrap() == "Computer" {
+                self.ai(-1);
+            } 
+            else {
+                self.reject_click = false;
+            }
         }
     }
 
@@ -199,6 +539,22 @@ impl Connect4Canvas {
             }
         }
     }
+
+    //This method resets the board for new game
+    fn reset(&mut self) {
+        self.board = vec![vec![0; 7]; 6];
+        self.current_move = 0;
+        self.paused = false;
+        self.won = false;
+        self.reject_click = false;
+        self.plate_position.row = 0;
+        self.plate_position.col = 0;
+        self.plate_position.current_pos = 0;
+        self.plate_position.mode = false;
+
+        self.clear_board();
+        self.draw_board();
+    }
 }
 
 //-------------------------------------------------------------- Component Related ---------------------------------------------------------
@@ -217,11 +573,6 @@ impl Component for Connect4Canvas {
         let on_click_cb = ctx.link().callback(|e: MouseEvent| Msg::Click(e));
         let l = ctx.link().clone();
 
-
-        // let animation_cb = Closure::wrap(Box::new(move |row: usize, col: usize, current_pos: usize| {
-        //     l.send_message(Msg::AnimateMsg((row, col, current_pos)))
-        // }) as Box<dyn FnMut(usize, usize, usize)>);
-
         let animation_cb = Closure::wrap(Box::new(move || l.send_message(Msg::AnimateMsg)) as Box<dyn FnMut()>);
 
         Self {
@@ -235,13 +586,28 @@ impl Component for Connect4Canvas {
                 row: 0,
                 col: 0,
                 current_pos: 0,
-            }
+                mode: false
+            },
+            current_move: 0,
+            won: false,
+            paused: false,
+            reject_click: false,
         }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Click(e) => {
+                if self.reject_click {
+                    return false;
+                }
+
+                if self.won {
+                    self.reset();
+                    // TODO: send game done signal
+                    return true;
+                }
+
                 if let Some(target) = e.target_dyn_into::<HtmlElement>() {
                     let rect = target.get_bounding_client_rect();
                     let x = (e.client_x() as f64) - rect.left();
@@ -252,21 +618,26 @@ impl Component for Connect4Canvas {
                     // put the plate in corresponding column
                     for col in 0..7 {
                         if self.in_col(x, (75 * col + 100) as f64, 25 as f64) {
-                            self.place_plate(col);
+                            self.paused = false;
+
+                            if self.place_plate(col, false) == 1 {
+                                self.reject_click = true;
+                            }
+
+                            break;
                         }
                     }
                 }
                 false
             }
             Msg::AnimateMsg => {
-                self.draw_plate_animate(self.plate_position.row, self.plate_position.col, self.plate_position.current_pos);
+                self.draw_plate_animate(self.plate_position.row, self.plate_position.col, self.plate_position.current_pos, self.plate_position.mode);
                 false
             }
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        // ctx.link().send_message(Msg::Render);
 
         html! {
             <div>
@@ -281,9 +652,13 @@ impl Component for Connect4Canvas {
         }
     }
 
+    // This function makes sure that the board will be displayed when we first go to the webpage
     fn rendered(&mut self, ctx: &Context<Self>, first_render: bool) {
         self.draw_board();
     }
 
-
+    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+        self.props = ctx.props().clone();
+        true
+    }
 } 

@@ -52,7 +52,7 @@ impl Component for Connect4Side {
                         canvas_id = "connect_computer" 
                         player1 = "Kevin" 
                         player2 = "Computer" 
-                        difficulty = {Difficulty::Easy}/>
+                        difficulty = {Difficulty::Medium}/>
                 </div>
             </>
         }

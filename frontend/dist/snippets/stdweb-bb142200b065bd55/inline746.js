@@ -1,1 +1,1 @@
-export function __cargo_web_snippet_8c32019649bb581b1b742eeedfc410e2bedd56a6(Module, $0, $1) { var array = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );Module.STDWEB_PRIVATE.serialize_array( $1, array ); }
+export function __cargo_web_snippet_d83c307a9f5c24db235c8d2610c1ea4e77f3a5c3(Module, $0) { var o = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (o instanceof DOMStringMap); }
