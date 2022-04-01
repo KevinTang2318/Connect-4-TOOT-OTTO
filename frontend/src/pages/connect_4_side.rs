@@ -9,6 +9,7 @@ use yew::{html, Component, Context, Html, NodeRef};
 use web_sys::HtmlInputElement;
 
 
+use super::connect_4_canvas::Connect4Canvas;
 
 pub enum Msg {
     InsertName(String),
@@ -28,6 +29,12 @@ pub struct Connect4Side {
     name_input: NodeRef,
 }
 
+#[derive(PartialEq, Copy, Clone, Debug)]
+pub enum Difficulty {
+    Easy,
+    Medium,
+    Hard,
+}
 
 impl Component for Connect4Side {
     type Message = Msg;

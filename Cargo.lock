@@ -68,6 +68,7 @@ dependencies = [
 ]
 
 [[package]]
+<<<<<<< HEAD
 name = "anyhow"
 version = "1.0.56"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -78,6 +79,12 @@ name = "anymap"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "33954243bd79057c2de7338850b85983a44588021f8a5fee574a8888c6de4344"
+=======
+name = "anymap2"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d301b3b94cb4b2f23d7917810addbbaff90738e0ca2be692bd027e70d7e0330c"
+>>>>>>> 8a5e73e4f26603c344ba11c1adc34974e702e379
 
 [[package]]
 name = "async-attributes"
@@ -678,6 +685,13 @@ dependencies = [
 name = "front-end"
 version = "0.1.0"
 dependencies = [
+<<<<<<< HEAD
+=======
+ "gloo 0.6.1",
+ "gloo-utils",
+ "stdweb",
+ "wasm-bindgen",
+>>>>>>> 8a5e73e4f26603c344ba11c1adc34974e702e379
  "web-sys",
  "yew",
  "yew-router",
@@ -859,6 +873,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "gloo"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f96605dc96adaffef27d911a805f0269d83ab89c1076e9c75ebac64a1a27215d"
+dependencies = [
+ "gloo-console",
+ "gloo-dialogs",
+ "gloo-events",
+ "gloo-file",
+ "gloo-history",
+ "gloo-net",
+ "gloo-render",
+ "gloo-storage",
+ "gloo-timers",
+ "gloo-utils",
+ "gloo-worker",
+]
+
+[[package]]
 name = "gloo-console"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -900,6 +933,42 @@ dependencies = [
  "gloo-events",
  "js-sys",
  "wasm-bindgen",
+ "web-sys",
+]
+
+[[package]]
+name = "gloo-history"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f81af52c0d31e86242eecefe1ed4d066deb79cfb80f9f7da0847fac417396bfe"
+dependencies = [
+ "gloo-events",
+ "gloo-utils",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_urlencoded",
+ "thiserror",
+ "wasm-bindgen",
+ "web-sys",
+]
+
+[[package]]
+name = "gloo-net"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2899cb1a13be9020b010967adc6b2a8a343b6f1428b90238c9d53ca24decc6db"
+dependencies = [
+ "futures-channel",
+ "futures-core",
+ "futures-sink",
+ "gloo-utils",
+ "js-sys",
+ "pin-project",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
  "web-sys",
 ]
 
@@ -947,6 +1016,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "05c77af6f96a4f9e27c8ac23a88407381a31f4a74c3fb985c85aa79b8d898136"
 dependencies = [
  "js-sys",
+ "wasm-bindgen",
+ "web-sys",
+]
+
+[[package]]
+name = "gloo-worker"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7c843b9a46d07485026f030be7bd008580a12a2920fea837745a440a3b0c97cb"
+dependencies = [
+ "anymap2",
+ "bincode",
+ "gloo-console",
+ "gloo-utils",
+ "js-sys",
+ "serde",
+ "slab",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -1565,6 +1651,26 @@ name = "percent-encoding"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
+
+[[package]]
+name = "pin-project"
+version = "1.0.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "58ad3879ad3baf4e44784bc6a718a8698867bb991f8ce24d1bcbe2cfb4c3a75e"
+dependencies = [
+ "pin-project-internal",
+]
+
+[[package]]
+name = "pin-project-internal"
+version = "1.0.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "744b6f092ba29c3650faf274db506afd39944f48420f6c86b17cfe0ee1cb36bb"
+dependencies = [
+ "proc-macro2 1.0.36",
+ "quote 1.0.16",
+ "syn 1.0.89",
+]
 
 [[package]]
 name = "pin-project-lite"
@@ -2685,7 +2791,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2a1ccb53e57d3f7d847338cf5758befa811cabe207df07f543c06f502f9998cd"
 dependencies = [
  "console_error_panic_hook",
- "gloo",
+ "gloo 0.4.2",
  "gloo-utils",
  "indexmap",
  "js-sys",
@@ -2730,7 +2836,7 @@ version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "155804f6f3aa309f596d5c3fa14486a94e7756f1edd7634569949e401d5099f2"
 dependencies = [
- "gloo",
+ "gloo 0.4.2",
  "gloo-utils",
  "js-sys",
  "route-recognizer",

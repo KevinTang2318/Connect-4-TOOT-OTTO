@@ -34,6 +34,12 @@ fn index() -> Option<NamedFile> {
     NamedFile::open(Path::new("target/deploy/index.html")).ok()
 }
 
+// routing for static files
+#[get("/<file..>")]
+fn files(file: PathBuf) -> Option<NamedFile> {
+    NamedFile::open(Path::new("target/deploy/").join(file)).ok()
+}
+
 #[get("/games")]
 fn get(collection: State<Collection<Game>>) -> Json<Vec<Game>> {
     let mut games = Vec::new();
@@ -57,7 +63,7 @@ fn post(game_json: Json<Game>, collection: State<Collection<Game>>) {
     if let game = game_json.into_inner() {
         collection.insert_one(game, None).unwrap();
     }
-
+    
 }
 
 fn rocket() -> Result<rocket::Rocket, mongodb::error::Error> { 
@@ -68,7 +74,7 @@ fn rocket() -> Result<rocket::Rocket, mongodb::error::Error> {
                         .collection::<Game>("games");
 
 
-    Ok(rocket::ignite().manage(collection).mount("/", routes![index]))
+    Ok(rocket::ignite().manage(collection).mount("/", routes![index, files, get, post]))
 }
 
 fn main() {
