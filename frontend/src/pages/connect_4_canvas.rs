@@ -575,6 +575,20 @@ impl Component for Connect4Canvas {
 
         let animation_cb = Closure::wrap(Box::new(move || l.send_message(Msg::AnimateMsg)) as Box<dyn FnMut()>);
 
+        let difficulty = ctx.props().difficulty.clone();
+
+        // match difficulty {
+        //     Difficulty::Easy => {
+        //         gloo::console::log!("Current difficulty: Easy");
+        //     },
+        //     Difficulty::Medium=> {
+        //         gloo::console::log!("Current difficulty: Medium");
+        //     },
+        //     Difficulty::Hard => {
+        //         gloo::console::log!("Current difficulty: Hard");
+        //     }
+        // }
+
         Self {
             props: ctx.props().clone(),
             canvas_id,
@@ -612,7 +626,6 @@ impl Component for Connect4Canvas {
                     let rect = target.get_bounding_client_rect();
                     let x = (e.client_x() as f64) - rect.left();
                     let y = (e.client_y() as f64) - rect.top();
-                    // gloo::console::log!(&format!("Left? : {} ; Top? : {}", x, y));
 
                     // check which column is the click in
                     // put the plate in corresponding column
@@ -659,6 +672,20 @@ impl Component for Connect4Canvas {
 
     fn changed(&mut self, ctx: &Context<Self>) -> bool {
         self.props = ctx.props().clone();
+
+        // let difficulty = ctx.props().difficulty.clone();
+        // match difficulty {
+        //     Difficulty::Easy => {
+        //         gloo::console::log!("Current difficulty changed to: Easy");
+        //     },
+        //     Difficulty::Medium=> {
+        //         gloo::console::log!("Current difficulty changed to: Medium");
+        //     },
+        //     Difficulty::Hard => {
+        //         gloo::console::log!("Current difficulty changed to: Hard");
+        //     }
+        // }
+
         true
     }
 } 
