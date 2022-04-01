@@ -662,6 +662,7 @@ version = "0.1.0"
 dependencies = [
  "gloo 0.6.1",
  "gloo-utils",
+ "js-sys",
  "stdweb",
  "wasm-bindgen",
  "web-sys",

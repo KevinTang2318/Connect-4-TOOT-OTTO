@@ -7,6 +7,8 @@ use web_sys::{
     window, CanvasRenderingContext2d, HtmlCanvasElement, MouseEvent, HtmlElement
 };
 
+use std::{thread, time};
+
 use super::connect_4_side::Difficulty;
 
 pub struct Connect4Canvas {
@@ -15,6 +17,8 @@ pub struct Connect4Canvas {
     canvas: NodeRef,
     board: Vec<Vec<i64>>,
     on_click_cb: Callback<MouseEvent>,
+    animation_cb: Closure<dyn FnMut()>,
+    plate_position: PlatePosition,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -26,12 +30,27 @@ pub struct GameProperty {
     // pub game_end_callback: Callback<i64>,
 }
 
+// This struct is used to store the plate destination and current location
+// Used for creating animation
+#[derive(Clone, PartialEq)]
+pub struct PlatePosition {
+    pub row: usize,
+    pub col: usize,
+    pub current_pos: usize,
+}
+
 pub enum Msg {
     Click(MouseEvent),
+    AnimateMsg, // row, col, current_pos, 
     // Render
 }
 
 impl Connect4Canvas {
+
+    // Determins which column is the current plate placed
+    fn in_col(&self, coord: f64, x: f64, radius: f64) -> bool {
+        return (coord - x) * (coord - x) <= radius * radius;
+    }
 
     // Place plate in the corresponding column
     fn place_plate(&mut self, col: usize) {
@@ -42,7 +61,7 @@ impl Connect4Canvas {
         if self.board[row][col] != 0 {
             // The column is full, cannot add more plates
             // TODO: add corresponding reactions
-            gloo::console::log!("66666");
+            gloo::console::log!("Column full! Connot add more plates!");
             return;
         }
 
@@ -58,12 +77,10 @@ impl Connect4Canvas {
             row = 5;
         }
 
-        gloo::console::log!(&format!("row : {} ; col : {}", row, col));
-
         // Place the plate in the board by placing a 1 in the corresponding array location
         self.board[row][col] = 1;
 
-        self.draw_plate((75 * col + 100) as f64 , (75 * row + 50) as f64, "#ff4136", "black"); // place it at the first line
+        self.draw_plate_animate(row, col, 0);
     }
 
     fn draw_board(&self) {
@@ -122,17 +139,69 @@ impl Connect4Canvas {
         ctx.fill();
     }
 
-    // Determins which column is the current plate placed
-    fn in_col(&self, coord: f64, x: f64, radius: f64) -> bool {
-        return (coord - x) * (coord - x) <= radius * radius;
+    // Draw the plate with animation (plate slowly dropping)
+    fn draw_plate_animate(&mut self, row: usize, col: usize, current_pos: usize) {
+        let mut plate_color = "#ff4136";
+
+        if row * 75 > current_pos {
+            // Still in progress of dropping
+            self.clear_board();
+            self.draw_game();
+            self.draw_board();
+            self.draw_plate((75 * col + 100) as f64, (current_pos + 50) as f64, plate_color, "black");
+
+            // Update the point location for next drawing
+            self.plate_position.row = row;
+            self.plate_position.col = col;
+            self.plate_position.current_pos = current_pos + 25;
+
+            window()
+                .unwrap()
+                .request_animation_frame(&self.animation_cb.as_ref().unchecked_ref())
+                .unwrap();
+        }
+        else {
+            self.board[row][col] = 1;
+            self.clear_board();
+            self.draw_game();
+            self.draw_board();
+        }
     }
 
-    fn process_mouse_click(&self, e : MouseEvent) {
+    // This method clears the entire canvas, including the blue portion
+    fn clear_board(&self) {
+        let canvas: HtmlCanvasElement = self.canvas.cast().unwrap();
+        let ctx: CanvasRenderingContext2d = canvas
+            .get_context("2d")
+            .unwrap()
+            .unwrap()
+            .dyn_into()
+            .unwrap();
 
+        ctx.clear_rect(0.0, 0.0, canvas.width().into(), canvas.height().into());
     }
 
-    // fn animate()
+    // Draw the plates on the board based on what is stored in the self.board
+    fn draw_game(&self) {
+        for row in 0..6 {
+            for col in 0..7 {
+                // determin the plate color
+                let mut fill_color = "transparent";
+                if self.board[row][col] >= 1 {
+                    fill_color = "#ff4136";
+                } else if self.board[row][col] <= -1 {
+                    fill_color = "#ffff00";
+                }
+
+                if fill_color != "transparent" {
+                    self.draw_plate((75 * col + 100) as f64, (75 * row + 50) as f64, fill_color, "black");
+                }
+            }
+        }
+    }
 }
+
+//-------------------------------------------------------------- Component Related ---------------------------------------------------------
 
 impl Component for Connect4Canvas {
     type Message = Msg;
@@ -146,6 +215,14 @@ impl Component for Connect4Canvas {
         // The callback function for mouse click
         // Used to send a mesage and let the component to get the click position
         let on_click_cb = ctx.link().callback(|e: MouseEvent| Msg::Click(e));
+        let l = ctx.link().clone();
+
+
+        // let animation_cb = Closure::wrap(Box::new(move |row: usize, col: usize, current_pos: usize| {
+        //     l.send_message(Msg::AnimateMsg((row, col, current_pos)))
+        // }) as Box<dyn FnMut(usize, usize, usize)>);
+
+        let animation_cb = Closure::wrap(Box::new(move || l.send_message(Msg::AnimateMsg)) as Box<dyn FnMut()>);
 
         Self {
             props: ctx.props().clone(),
@@ -153,6 +230,12 @@ impl Component for Connect4Canvas {
             canvas: NodeRef::default(),
             board,
             on_click_cb,
+            animation_cb,
+            plate_position : PlatePosition{
+                row: 0,
+                col: 0,
+                current_pos: 0,
+            }
         }
     }
 
@@ -173,6 +256,10 @@ impl Component for Connect4Canvas {
                         }
                     }
                 }
+                false
+            }
+            Msg::AnimateMsg => {
+                self.draw_plate_animate(self.plate_position.row, self.plate_position.col, self.plate_position.current_pos);
                 false
             }
         }
