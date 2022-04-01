@@ -8,7 +8,6 @@ edition = "2021"
 [dependencies]
 yew = "^0.19"
 yew-router = "^0.16"
-web-sys = "0.3.56"
 yew-stdweb = "0.18.0"
 stdweb = "0.4.20"
 gloo = "0.6.1"
