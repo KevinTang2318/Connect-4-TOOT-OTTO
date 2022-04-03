@@ -1,15 +1,23 @@
+use std::{
+    error::Error,
+    fmt::{self, Debug, Display, Formatter},
+};
 use yew::prelude::*;
-use yew::virtual_dom::VNode;
 use yew::Properties;
 use yew::Callback;
-use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
+use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::JsFuture;
 use web_sys::{
-    window, CanvasRenderingContext2d, HtmlCanvasElement, MouseEvent, HtmlElement
+    window, CanvasRenderingContext2d, HtmlCanvasElement, MouseEvent, HtmlElement, Request, RequestInit, RequestMode, Response, Blob
 };
 use stdweb::js;
 use stdweb::unstable::TryInto;
+use stdweb::web::Date;
+
 
 use super::connect_4_side::Difficulty;
+use super::score_board::Game;
 
 pub struct Connect4Canvas {
     props: GameProperty,
@@ -18,11 +26,13 @@ pub struct Connect4Canvas {
     board: Vec<Vec<i64>>,
     on_click_cb: Callback<MouseEvent>,
     animation_cb: Closure<dyn FnMut()>,
+    post_cb: Callback<i32>,
     plate_position: PlatePosition,
     current_move: i64,
     won: bool,
-    paused: bool,
+    // paused: bool,
     reject_click: bool,
+    game_result: Game,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -31,6 +41,7 @@ pub struct GameProperty {
     pub player2: Option<String>,
     pub difficulty: Difficulty,
     pub canvas_id: Option<String>,
+    pub game_done_cbk: Callback<i64>,
 }
 
 // This struct is used to store the plate destination and current location
@@ -43,10 +54,31 @@ pub struct PlatePosition {
     mode: bool,
 }
 
+/// Something wrong has occurred while fetching an external resource.
+#[derive(Debug, Clone, PartialEq)]
+pub struct FetchError {
+    err: JsValue,
+}
+
 pub enum Msg {
     Click(MouseEvent),
-    AnimateMsg, // row, col, current_pos, 
+    AnimateMsg, 
+    SendPost,
+    Ignore
     // Render
+}
+
+impl Display for FetchError {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        Debug::fmt(&self.err, f)
+    }
+}
+impl Error for FetchError {}
+
+impl From<JsValue> for FetchError {
+    fn from(value: JsValue) -> Self {
+        Self { err: value }
+    }
 }
 
 impl Connect4Canvas {
@@ -164,25 +196,56 @@ impl Connect4Canvas {
         }
     }
 
-    fn win(&mut self, player: i64) {
-        self.paused = true;
+    fn win(&mut self, player_value: i64) {
+        // self.paused = true;
         self.won = true;
         // self.reject_click = false;
 
         let mut msg = String::new();
-        if player > 0 {
+        let mut winner = String::new();
+        if player_value > 0 {
+            winner = self.props.player1.as_ref().unwrap().clone();
             msg = format!("{} wins", self.props.player1.as_ref().unwrap());
-        } else if player < 0 {
+        } else if player_value < 0 {
+            winner = self.props.player2.as_ref().unwrap().clone();
             msg = format!("{} wins", self.props.player2.as_ref().unwrap());
         } else {
-            msg = "It's a draw".to_string();
+            winner = String::from("Draw");
+            msg = "Draw".to_string();
         }
 
         let to_print = format!("{} - Click on game board to reset", msg);
 
-        gloo::console::log!(to_print);
+        gloo::console::log!(&to_print);
 
-        //TODO: construct DB data
+        // Draw wining information on board
+        let canvas: HtmlCanvasElement = self.canvas.cast().unwrap();
+        let ctx: CanvasRenderingContext2d = canvas
+            .get_context("2d")
+            .unwrap()
+            .unwrap()
+            .dyn_into()
+            .unwrap();
+
+        ctx.set_font("14pt sans-serif");
+        ctx.set_fill_style(&JsValue::from("#111111"));
+
+        ctx.begin_path();
+        ctx.fill_text(&to_print, 150.0, 20.0);
+
+        self.game_result = Game {
+            GameDate: Date::now() as i64,
+            gameType: String::from("Connect-466666"),
+            gameNumber: String::new(),
+            Player1Name: self.props.player1.as_ref().unwrap().clone(),
+            Player2Name: self.props.player2.as_ref().unwrap().clone(),
+            WinnerName: winner.clone(),
+        };
+        
+        self.post_cb.emit(0);
+
+        ctx.restore();
+
     }
 
     // The fillMap function in Connect4App.js
@@ -283,8 +346,6 @@ impl Connect4Canvas {
             if let Some(temp_state) = temp_state_option {
                 let temp_val = self.value(&temp_state, depth, alpha, beta, ai_move_value);
 
-                gloo::console::log!(&format!("Max temp_val.0: {}", temp_val.0));
-
                 if temp_val.0 > v {
                     v = temp_val.0;
                     new_move = j as i64;
@@ -319,8 +380,6 @@ impl Connect4Canvas {
             if let Some(temp_state) = temp_state_option {
                 let temp_val = self.value(&temp_state, depth, alpha, beta, ai_move_value);
 
-                gloo::console::log!(&format!("Min temp_val.0: {}", temp_val.0));
-
                 if temp_val.0 < v {
                     v = temp_val.0;
                     new_move = j as i64;
@@ -351,15 +410,13 @@ impl Connect4Canvas {
         let val = val_choice.0;
         let choice = val_choice.1;
 
-        self.paused = false;
-        // TODO: Add rejectclick callback
-        let mut done = self.place_plate(choice as usize, true);
+        // self.paused = false;
+        let mut ret = self.place_plate(choice as usize, true);
 
-        // TODO: Add rejectclick callback
-        while done < 0 {
+        while ret < 0 {
             gloo::console::log!("Using random agent");
             let random_choice = self.get_random_val(7);
-            done = self.place_plate(random_choice, true);
+            ret = self.place_plate(random_choice, true);
         }
     }
 
@@ -377,7 +434,7 @@ impl Connect4Canvas {
         let mut row : usize = 0;
         let mut row_found : bool = false;
 
-        if self.paused || self.won {
+        if  self.won {
             return 0;
         }
 
@@ -401,7 +458,7 @@ impl Connect4Canvas {
 
         self.draw_plate_animate(row, col, 0, mode);
 
-        self.paused = true;
+        // self.paused = true;
         return 1;
     }
 
@@ -463,12 +520,13 @@ impl Connect4Canvas {
 
     // Draw the plate with animation (plate slowly dropping)
     fn draw_plate_animate(&mut self, row: usize, col: usize, current_pos: usize, mode: bool) {
+
         let mut plate_color = "#ff4136";
 
-        if self.current_move >= 1 {
+        if self.player_move() >= 1 {
             plate_color = "#ff4136";
         }
-        else if self.current_move <= -1  {
+        else if self.player_move() <= -1  {
             plate_color = "#ffff00";
         }
 
@@ -498,6 +556,11 @@ impl Connect4Canvas {
             self.draw_board();
 
             self.check();
+
+            // This makes sure that when we win the game, we can click the board to reset
+            if self.won {
+                self.reject_click = false;
+            }
 
             if mode == false && self.props.player2.as_ref().unwrap() == "Computer" {
                 self.ai(-1);
@@ -544,7 +607,7 @@ impl Connect4Canvas {
     fn reset(&mut self) {
         self.board = vec![vec![0; 7]; 6];
         self.current_move = 0;
-        self.paused = false;
+        // self.paused = false;
         self.won = false;
         self.reject_click = false;
         self.plate_position.row = 0;
@@ -555,6 +618,31 @@ impl Connect4Canvas {
         self.clear_board();
         self.draw_board();
     }
+}
+
+// #[wasm_bindgen]
+pub async fn send_post_request(game_result:Game) -> Result<(), FetchError> {
+
+    let mut opts = RequestInit::new();
+    opts.method("POST");
+    opts.mode(RequestMode::Cors);
+
+    let game_result_json = serde_json::to_string(&game_result).unwrap();
+
+    opts.body(Some(&JsValue::from_serde(&game_result_json).unwrap()));
+
+
+    let request = Request::new_with_str_and_init("/games", &opts)?;
+
+    request
+        .headers()
+        .set("Content-Type", "application/json")?;
+
+
+    let window = window().unwrap();
+    let resp_value = JsFuture::from(window.fetch_with_request(&request)).await?;
+
+    Ok(())
 }
 
 //-------------------------------------------------------------- Component Related ---------------------------------------------------------
@@ -574,6 +662,10 @@ impl Component for Connect4Canvas {
         let l = ctx.link().clone();
 
         let animation_cb = Closure::wrap(Box::new(move || l.send_message(Msg::AnimateMsg)) as Box<dyn FnMut()>);
+
+        let l2 = ctx.link().clone();
+        // let post_cb = Closure::wrap(Box::new(move || l2.send_message(Msg::SendPost)) as Box<dyn FnMut()>);
+        let post_cb = ctx.link().callback(|e| Msg::SendPost);
 
         let difficulty = ctx.props().difficulty.clone();
 
@@ -596,6 +688,7 @@ impl Component for Connect4Canvas {
             board,
             on_click_cb,
             animation_cb,
+            post_cb,
             plate_position : PlatePosition{
                 row: 0,
                 col: 0,
@@ -604,8 +697,16 @@ impl Component for Connect4Canvas {
             },
             current_move: 0,
             won: false,
-            paused: false,
+            // paused: false,
             reject_click: false,
+            game_result: Game {
+                GameDate: Date::now() as i64,
+                gameType: String::from("Connect-4"),
+                gameNumber: String::new(),
+                Player1Name: "".to_string(),
+                Player2Name: "".to_string(),
+                WinnerName: "".to_string(),
+            },
         }
     }
 
@@ -618,7 +719,7 @@ impl Component for Connect4Canvas {
 
                 if self.won {
                     self.reset();
-                    // TODO: send game done signal
+                    self.props.game_done_cbk.emit(0); // This realized the click on game board to reset function
                     return true;
                 }
 
@@ -631,7 +732,7 @@ impl Component for Connect4Canvas {
                     // put the plate in corresponding column
                     for col in 0..7 {
                         if self.in_col(x, (75 * col + 100) as f64, 25 as f64) {
-                            self.paused = false;
+                            // self.paused = false;
 
                             if self.place_plate(col, false) == 1 {
                                 self.reject_click = true;
@@ -642,11 +743,32 @@ impl Component for Connect4Canvas {
                     }
                 }
                 false
-            }
+            },
             Msg::AnimateMsg => {
                 self.draw_plate_animate(self.plate_position.row, self.plate_position.col, self.plate_position.current_pos, self.plate_position.mode);
                 false
-            }
+            },
+            Msg::SendPost => {
+
+                let game_result = self.game_result.clone();
+
+                ctx.link().send_future(async {
+                    match send_post_request(game_result).await {
+                        Ok(_) => {
+                            gloo::console::log!("Send POST request success.");
+                            Msg::Ignore
+                        },
+                        Err(err) => {
+                            gloo::console::log!("Send POST request failed");
+                            gloo::console::log!(err.to_string());
+                            Msg::Ignore
+                        }
+                    }
+                });
+
+                false
+            },
+            Msg::Ignore => {false},
         }
     }
 

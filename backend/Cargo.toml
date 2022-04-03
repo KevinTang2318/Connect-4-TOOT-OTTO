@@ -9,6 +9,7 @@ edition = "2021"
 rocket = "0.4.10"
 bson = "2.1.0"
 serde = "1.0.136"
+gloo = "0.6.1"
 
 [dependencies.mongodb]
 version = "2.1.0"

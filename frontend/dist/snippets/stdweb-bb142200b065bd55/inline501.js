@@ -1,1 +1,1 @@
-export function __cargo_web_snippet_f750c7bda400081b4d7209f43f9d59214d39f6ea(Module, $0, $1, $2) { $0 = Module.STDWEB_PRIVATE.to_js($0);$1 = Module.STDWEB_PRIVATE.to_js($1);$2 = Module.STDWEB_PRIVATE.to_js($2);var listener=($0);($1).removeEventListener(($2),listener);listener.drop(); }
+export function __cargo_web_snippet_5ea46f5fe1497699b50c32ad7888b513c2a97e37(Module, $0) { var o = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (o instanceof PointerEvent && o.type === "pointerleave"); }

@@ -1,1 +1,1 @@
-export function __cargo_web_snippet_8b7cc1a90ecd19ea6290d7d0a840fd125dd3febb(Module, $0) { var o = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (o instanceof Event && o.type === "resize"); }
+export function __cargo_web_snippet_ee7c4ac4dadca9485aa4c6eade45dc45dc5d3296(Module, $0) { var o = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (o instanceof PointerEvent); }

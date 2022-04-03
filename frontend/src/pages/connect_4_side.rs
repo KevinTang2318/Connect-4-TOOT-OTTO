@@ -139,18 +139,14 @@ impl Component for Connect4Side {
             <div style={format!("display: {}", self.state)}>
                 <br/>
                 <h4>{format!("New Game: {} Vs Computer", self.player_name)}</h4>
-                // //
-                // //Just to see difficulty is updating
-                // <h4>{format!("Difficulty: {}", self.difficulty)}</h4>
-                // //
                 <small>{format!("(Disc Colors: {} - ", self.player_name)} <b>{"Red"}</b> {"   and    Computer - "} <b>{"Yellow)"}</b></small>
                 <br/>
                 <Connect4Canvas  
                     canvas_id = "connect_computer" 
                     player1 = {self.player_name.clone()}
                     player2 = "Computer" 
-                    difficulty = {self.difficulty} />
-                    // game_done_cbk={link.callback(|_| Msg::EndGame)}/>
+                    difficulty = {self.difficulty}
+                    game_done_cbk={link.callback(|_| Msg::EndGame)}/>
             </div>
             </>
         }

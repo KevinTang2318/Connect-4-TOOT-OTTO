@@ -1,1 +1,1 @@
-export function __cargo_web_snippet_29ef3a8aaefcd4cb1dfc6284d7e36127515d26ae(Module, $0) { var o = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (o instanceof KeyboardEvent && o.type === "keydown"); }
+export function __cargo_web_snippet_cb7189e661dbf1c8e1e071d2e1d328e60834cc2a(Module, $0) { return (Module.STDWEB_PRIVATE.acquire_js_reference( $0 ) instanceof Int16Array) | 0; }
