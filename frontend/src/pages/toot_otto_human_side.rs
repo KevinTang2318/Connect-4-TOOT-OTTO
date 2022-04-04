@@ -13,7 +13,7 @@ use super::connect_4_canvas::Connect4Canvas;
 pub enum Msg {
     InsertName1(String),
     InsertName2(String),
-    ChooseLetter(String),
+    InputChanged,
     StartGame,
     EndGame,
 }
@@ -47,7 +47,7 @@ impl Component for TootOttoHumanSide {
         TootOttoHumanSide{
             player1_name: "".to_string(),
             player2_name: "".to_string(),
-            letter: "".to_string(),
+            letter: "T".to_string(),
             disabled: false,
             game_running: false,
             state: "none".to_string(),
@@ -67,8 +67,19 @@ impl Component for TootOttoHumanSide {
             Msg::InsertName2(name) => {
                 self.player2_name = name;
             },
-            Msg::ChooseLetter(letter) => {
-                self.letter = letter;
+            Msg::InputChanged => {
+                if let Some(letter) = self.letter_input.clone().cast::<HtmlInputElement>() {
+                    if self.letter.eq(&"T".to_string()){
+                        self.letter = "O".to_string();
+                    }
+                    else{
+                        self.letter = "T".to_string();
+                    }
+                }
+                else{
+
+                }    
+                    
             },
             Msg::StartGame => {
                 self.game_running = true;
@@ -89,7 +100,7 @@ impl Component for TootOttoHumanSide {
         let link = ctx.link();
         let name1_input_ref = self.name1_input.clone();
         let name2_input_ref = self.name2_input.clone();
-        let letter_input_ref = self.letter_input.clone();
+        //let letter_input_ref = self.letter_input.clone();
 
 
 
@@ -105,12 +116,6 @@ impl Component for TootOttoHumanSide {
             input.map(|input| Msg::InsertName1(input.value()))
         });
 
-        let onselect = link.batch_callback(move |_| {
-            let input = letter_input_ref.cast::<HtmlInputElement>();
-
-            input.map(|input| Msg::ChooseLetter(input.value()))
-        });
-        let ontoggle = onselect.clone();
 
         return html! {
             <>
@@ -145,10 +150,12 @@ impl Component for TootOttoHumanSide {
                 <small>{format!("(Winning Combination: {} - ", self.player1_name)} <b>{"TOOT"}</b> {format!("   and    {} - ", self.player2_name)} <b>{"OTTO)"}</b></small>
                 <br/>
                 {"Select a Disc Type:  "}
-                <input ref={self.letter_input.clone()}{onselect} type="radio" id="T" value="T" checked={self.letter=="T"}/>
+                <input ref={self.letter_input.clone()} onclick = {link.callback(|_| Msg::InputChanged)} type="radio" name="letter" value="T" checked={self.letter == "T".to_string()}/>
                 <label for="T">{"T"}</label>
-                <input ref={self.letter_input.clone()}{ontoggle} type="radio" id="O" value="O" checked={self.letter=="O"}/>
+                <input ref={self.letter_input.clone()} onclick = {link.callback(|_| Msg::InputChanged)} type="radio" name="letter" value="O" checked={self.letter == "O".to_string()}/>
                 <label for="O">{"O"}</label>
+                <h4>{format!("Letter is {}",self.letter)}</h4>
+                <br/>
                 <br/>
                 /*<TootCanvasModel: 
                     canvas_id="toot_human" 

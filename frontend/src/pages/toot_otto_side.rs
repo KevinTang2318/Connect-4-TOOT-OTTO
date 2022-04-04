@@ -15,7 +15,8 @@ pub enum Msg {
     ChooseDifficulty(String),
     StartGame,
     EndGame,
-    ChooseLetter(String),
+    InputChanged,
+    //InputChangedO,
 }
 
 
@@ -30,6 +31,7 @@ pub struct TootOttoSide {
     my_input: NodeRef,
     name_input: NodeRef,
     letter_input: NodeRef,
+    //letterO_input: NodeRef,
 }
 
 
@@ -41,7 +43,7 @@ impl Component for TootOttoSide {
         TootOttoSide{
             player_name: "".to_string(),
             difficulty: "Easy".to_string(),
-            letter: "".to_string(),
+            letter: "T".to_string(),
             disabled: false,
             game_running: false,
             state: "none".to_string(),
@@ -49,6 +51,7 @@ impl Component for TootOttoSide {
             my_input: NodeRef::default(),
             name_input: NodeRef::default(),
             letter_input: NodeRef::default(),
+            //letterO_input: NodeRef::default(),
         }
     }
 
@@ -71,9 +74,22 @@ impl Component for TootOttoSide {
                 self.disabled = false;
                 self.state = "none".to_string();
             },
-            Msg::ChooseLetter(letter) => {
-                self.letter = letter;
+            Msg::InputChanged => {
+                if let Some(letter) = self.letter_input.clone().cast::<HtmlInputElement>() {
+                    if self.letter.eq(&"T".to_string()){
+                        self.letter = "O".to_string();
+                    }
+                    else{
+                        self.letter = "T".to_string();
+                    }
+                }
+                else{
+
+                }    
+                    
             },
+            
+            
         }    
         true
     }
@@ -83,7 +99,7 @@ impl Component for TootOttoSide {
         let link = ctx.link();
         let my_input_ref = self.my_input.clone();
         let name_input_ref = self.name_input.clone();
-        let letter_input_ref = self.letter_input.clone();
+        //let letter_input_ref = self.letter_input.clone();
 
         let onchange = link.batch_callback(move |_| {
             let input = my_input_ref.cast::<HtmlInputElement>();
@@ -97,12 +113,8 @@ impl Component for TootOttoSide {
             input.map(|input| Msg::InsertName(input.value()))
         });
 
-        let onselect = link.batch_callback(move |_| {
-            let input = letter_input_ref.cast::<HtmlInputElement>();
-
-            input.map(|input| Msg::ChooseLetter(input.value()))
-        });
-        let ontoggle = onselect.clone();
+       // let onclick = link.callback(|_| Msg::InputChanged);
+        //let ontoggle = onselect.clone();
         
         return html! {
             <>
@@ -145,10 +157,11 @@ impl Component for TootOttoSide {
                 //
                 <small>{format!("(Winning Combination: {} - ", self.player_name)} <b>{"TOOT"}</b> {"   and    Computer - "} <b>{"OTTO)"}</b></small>
                 {" Select a Disc Type:  "}
-                <input ref={self.letter_input.clone()}{onselect} type="radio" id="T" value="T" checked={self.letter=="T"}/>
+                <input ref={self.letter_input.clone()} onclick = {link.callback(|_| Msg::InputChanged)} type="radio" name="letter" value="T" checked={self.letter == "T".to_string()}/>
                 <label for="T">{"T"}</label>
-                <input ref={self.letter_input.clone()}{ontoggle} type="radio" id="O" value="O" checked={self.letter=="O"}/>
+                <input ref={self.letter_input.clone()} onclick = {link.callback(|_| Msg::InputChanged)} type="radio" name="letter" value="O" checked={self.letter == "O".to_string()}/>
                 <label for="O">{"O"}</label>
+                <h4>{format!("Letter is {}",self.letter)}</h4>
                 <br/>
                 <br/>
                 /*<CanvasModel  
