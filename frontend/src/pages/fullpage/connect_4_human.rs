@@ -2,24 +2,24 @@ use yew::prelude::*;
 use yew::virtual_dom::VNode;
 use yew_router::prelude::*;
 
-use super::connect_4_side::Connect4Side;
+use crate::pages::connect_4_human_side::Connect4HumanSide;
 use crate::AppRoute;
 
 pub enum Msg {
     
 }
 
-pub struct Connect4 {
+pub struct Connect4Human {
     
 }
 
 
-impl Component for Connect4 {
+impl Component for Connect4Human {
     type Message = Msg;
     type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
-        Connect4{}
+        Connect4Human{}
     }
 
 
@@ -39,11 +39,18 @@ impl Component for Connect4 {
                         <div class="w3-container">
                             <h3 class="w3-padding-64"><b>{"Play"}<br/> {"Connect4 / TOOT-OTTO"}</b></h3>
                         </div>
+
                         <Link<AppRoute> to={AppRoute::HowToC4}>{ "How to Play Connect4" }</Link<AppRoute>>
                         <Link<AppRoute> to={AppRoute::Connect4}>{ "Play Connect4 With Computer" }</Link<AppRoute>>
+                        <Link<AppRoute> to={AppRoute::Connect4Human}>{ "Play Connect4 with another Human" }</Link<AppRoute>>
+                        <br/>
+                        <Link<AppRoute> to={AppRoute::HowToToot}>{ "How to Play TOOT-OTTO" }</Link<AppRoute>>
                         <Link<AppRoute> to={AppRoute::TootOtto}>{ "Play TOOT-OTTO With Computer" }</Link<AppRoute>>
+                        <Link<AppRoute> to={AppRoute::TootOttoHuman}>{ "Play TOOT-OTTO With another Human" }</Link<AppRoute>>
+                        <br/>
+                        <Link<AppRoute> to={AppRoute::GameHistory}>{ "View Game History" }</Link<AppRoute>>
+                        <Link<AppRoute> to={AppRoute::Scores}>{ "Score Board" }</Link<AppRoute>>
 
-                    
                     </nav>
                     <header class="w3-container w3-top w3-hide-large w3-red w3-xlarge w3-padding">
                     <a href="javascript:void(0)" class="w3-btn w3-red w3-border w3-border-white w3-margin-right">{"\u{2630}"}</a>
@@ -54,7 +61,7 @@ impl Component for Connect4 {
                     
                 {
                     html !{
-                        <Connect4Side/>
+                        <Connect4HumanSide/>
                     }
                 }
                 </div>

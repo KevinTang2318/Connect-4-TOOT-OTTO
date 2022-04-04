@@ -2,7 +2,7 @@ use yew::prelude::*;
 use yew::virtual_dom::VNode;
 use yew_router::prelude::*;
 
-use super::how_to_c4_side::HowToC4Side;
+use crate::pages::how_to_toot_side::HowToTootSide;
 use crate::AppRoute;
 
 
@@ -10,19 +10,19 @@ pub enum Msg {
     
 }
 
-pub struct HowToC4 {
+pub struct HowToToot {
     
 }
 
 
 
 
-impl Component for HowToC4 {
+impl Component for HowToToot {
     type Message = Msg;
     type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
-        HowToC4{}
+        HowToToot{}
     }
 
 
@@ -41,10 +41,17 @@ impl Component for HowToC4 {
                     <div class="w3-container">
                         <h3 class="w3-padding-64"><b>{"Play"}<br/> {"Connect4 / TOOT-OTTO"}</b></h3>
                     </div>
+
                     <Link<AppRoute> to={AppRoute::HowToC4}>{ "How to Play Connect4" }</Link<AppRoute>>
                     <Link<AppRoute> to={AppRoute::Connect4}>{ "Play Connect4 With Computer" }</Link<AppRoute>>
+                    <Link<AppRoute> to={AppRoute::Connect4Human}>{ "Play Connect4 with another Human" }</Link<AppRoute>>
+                    <br/>
+                    <Link<AppRoute> to={AppRoute::HowToToot}>{ "How to Play TOOT-OTTO" }</Link<AppRoute>>
                     <Link<AppRoute> to={AppRoute::TootOtto}>{ "Play TOOT-OTTO With Computer" }</Link<AppRoute>>
-
+                    <Link<AppRoute> to={AppRoute::TootOttoHuman}>{ "Play TOOT-OTTO With another Human" }</Link<AppRoute>>
+                    <br/>
+                    <Link<AppRoute> to={AppRoute::GameHistory}>{ "View Game History" }</Link<AppRoute>>
+                    <Link<AppRoute> to={AppRoute::Scores}>{ "Score Board" }</Link<AppRoute>>
                 
                 </nav>
                 <header class="w3-container w3-top w3-hide-large w3-red w3-xlarge w3-padding">
@@ -56,7 +63,7 @@ impl Component for HowToC4 {
                 
             {
                 html !{
-                    <HowToC4Side/>
+                    <HowToTootSide/>
                 }
             }
             </div>
@@ -65,5 +72,3 @@ impl Component for HowToC4 {
     }
     }
 }
-
-
