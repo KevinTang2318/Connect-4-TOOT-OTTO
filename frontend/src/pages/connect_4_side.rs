@@ -23,7 +23,7 @@ pub struct Connect4Side {
     disabled: bool,
     game_running: bool,
     state: String,
-    difficulty: String,
+    difficulty: Difficulty,
     my_input: NodeRef,
     name_input: NodeRef,
 }
@@ -45,7 +45,7 @@ impl Component for Connect4Side {
             disabled: false,
             game_running: false,
             state: "none".to_string(),
-            difficulty: "Easy".to_string(),
+            difficulty: Difficulty::Easy,
             my_input: NodeRef::default(),
             name_input: NodeRef::default(),
         }
@@ -58,7 +58,16 @@ impl Component for Connect4Side {
         
             },
             Msg::ChooseDifficulty(difficulty) => {
-                self.difficulty = difficulty;
+                // self.difficulty = difficulty;
+                if difficulty == "Hard" {
+                    self.difficulty = Difficulty::Hard;
+                }
+                else if difficulty == "Medium" {
+                    self.difficulty = Difficulty::Medium;
+                }
+                else {
+                    self.difficulty = Difficulty::Easy;
+                }
             },
             Msg::StartGame => {
                 self.game_running = true;
@@ -83,7 +92,7 @@ impl Component for Connect4Side {
 
         let onchange = link.batch_callback(move |_| {
             let input = my_input_ref.cast::<HtmlInputElement>();
-
+            
             input.map(|input| Msg::ChooseDifficulty(input.value()))
         });
 
@@ -129,19 +138,14 @@ impl Component for Connect4Side {
             <div style={format!("display: {}", self.state)}>
                 <br/>
                 <h4>{format!("New Game: {} Vs Computer", self.player_name)}</h4>
-                //
-                //Just to see difficulty is updating
-                <h4>{format!("Difficulty: {}", self.difficulty)}</h4>
-                //
                 <small>{format!("(Disc Colors: {} - ", self.player_name)} <b>{"Red"}</b> {"   and    Computer - "} <b>{"Yellow)"}</b></small>
                 <br/>
-                /*<Connect4Canvas/>  
-                    //canvas_id = "connect_computer" 
-                    //player1 = {self.player_name.clone()}
-                    //player2 = "Computer" 
-                    //difficulty = {self.difficulty}
-                    //game_done_cbk={link.callback(|_| Msg::EndGame)}*/
-                    
+                <Connect4Canvas  
+                    canvas_id = "connect_computer" 
+                    player1 = {self.player_name.clone()}
+                    player2 = "Computer" 
+                    difficulty = {self.difficulty}
+                    game_done_cbk={link.callback(|_| Msg::EndGame)}/>
             </div>
             </>
         }

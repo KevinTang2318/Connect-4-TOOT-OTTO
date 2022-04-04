@@ -15,3 +15,4 @@ pub mod scores_side;
 pub mod connect_4_canvas;
 
 pub mod fullpage;
+pub mod score_board;

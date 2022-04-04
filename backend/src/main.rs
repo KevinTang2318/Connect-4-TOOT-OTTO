@@ -8,6 +8,11 @@ use bson::{bson, Bson};
 use rocket_contrib::json::Json;
 use serde::{Serialize, Deserialize};
 
+use std::io::{self, Read};
+
+use rocket::Data;
+use rocket::response::Debug;
+
 use mongodb::{
     bson::doc,
     sync::Client,
@@ -18,12 +23,12 @@ use mongodb::{
 #[derive(Serialize, Deserialize, Debug)]
 #[allow(non_snake_case)]
 pub struct Game {
-    GameDate: i64,
-    gameType: String,
-    gameNumber: String,
-    Player1Name: String,
-    Player2Name: String,
-    WinnerName: String,
+    pub GameDate: i64,
+    pub gameType: String,
+    pub gameNumber: String,
+    pub Player1Name: String,
+    pub Player2Name: String,
+    pub WinnerName: String,
 }
 
 //--------------------------------------------------------------------------------
