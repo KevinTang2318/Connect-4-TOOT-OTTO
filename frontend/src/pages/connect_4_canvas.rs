@@ -16,7 +16,7 @@ use stdweb::unstable::TryInto;
 use stdweb::web::Date;
 
 
-use super::connect_4_side::Difficulty;
+// use super::connect_4_side::Difficulty;
 use super::score_board::Game;
 
 pub struct Connect4Canvas {
@@ -33,6 +33,13 @@ pub struct Connect4Canvas {
     // paused: bool,
     reject_click: bool,
     game_result: Game,
+}
+
+#[derive(PartialEq, Copy, Clone, Debug)]
+pub enum Difficulty {
+    Easy,
+    Medium,
+    Hard,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -199,7 +206,7 @@ impl Connect4Canvas {
     fn win(&mut self, player_value: i64) {
         // self.paused = true;
         self.won = true;
-        // self.reject_click = false;
+        self.reject_click = false;
 
         let mut msg = String::new();
         let mut winner = String::new();
@@ -274,14 +281,16 @@ impl Connect4Canvas {
     }
 
     // The MiniMax Algorithm with alpha beta pruning
-    fn value(&self, state: &Vec<Vec<i64>>, depth: i64, mut alpha: i64, mut beta: i64, ai_move_value: i64) -> (i64, i64) {
+    fn value(&self, state: &Vec<Vec<i64>>, depth: i64, alpha: &mut i64, beta: &mut i64, ai_move_value: i64) -> (i64, i64) {
         let val = self.check_state(state);
 
         let max_depth = match self.props.difficulty {
-            Easy => 1,
-            Medium => 3,
-            Hard => 5
+            Difficulty::Easy => 1,
+            Difficulty::Medium => 3,
+            Difficulty::Hard => 4
         };
+
+        // gloo::console::log!(&format!("Max depth: {}", &max_depth));
 
         if depth >= max_depth {
             let mut ret_val = 0;
@@ -294,11 +303,12 @@ impl Connect4Canvas {
             // If it lead to winning, then do it
             if win_val == 4 * ai_move_value {
                 // AI win, AI wants to win of course
-                ret_val = 999999 - depth * depth;
+                ret_val = 999999;
             } else if win_val == 4 * ai_move_value * -1 {
                 // AI lose, AI hates losing
-                ret_val = 999999 * -1 - depth * depth;
+                ret_val = 999999 * -1;
             }
+            ret_val = ret_val - depth * depth;
 
             return (ret_val, -1);
         }
@@ -311,7 +321,7 @@ impl Connect4Canvas {
         }
         if win == 4 * ai_move_value * -1 {
             // AI lose, AI hates losing
-            return (999999 * -1 - depth * depth, -1);
+            return (999999 * (-1) - depth * depth, -1);
         }
 
         if depth % 2 == 0 {
@@ -335,13 +345,15 @@ impl Connect4Canvas {
     }
 
     // The maxState function in Connect4App.js
-    fn max_state(&self, state: &Vec<Vec<i64>>, depth: i64, mut alpha: i64, mut beta: i64, ai_move_value: i64) -> (i64, i64){
+    fn max_state(&self, state: &Vec<Vec<i64>>, depth: i64, alpha: &mut i64, beta: &mut i64, ai_move_value: i64) -> (i64, i64){
         let mut v = -100000000007;
         let mut new_move: i64 = -1;
         let mut move_queue = Vec::new();
 
         for j in 0..7 {
             let temp_state_option = self.fill_map(state, j, ai_move_value);
+
+            gloo::console::log!(&format!("Max aplha: {}, Max beta: {}", alpha, beta));
 
             if let Some(temp_state) = temp_state_option {
                 let temp_val = self.value(&temp_state, depth, alpha, beta, ai_move_value);
@@ -357,11 +369,11 @@ impl Connect4Canvas {
                 }
 
                 // alpha-beta pruning
-                if v > beta {
+                if v > *beta {
                     new_move = self.choose(&move_queue);
                     return (v, new_move);
                 }
-                alpha = std::cmp::max(alpha, v);
+                *alpha = std::cmp::max(*alpha, v);
             }
         }
         new_move = self.choose(&move_queue);
@@ -369,13 +381,15 @@ impl Connect4Canvas {
         return (v, new_move);
     }
 
-    fn min_state(&self, state: &Vec<Vec<i64>>, depth: i64, mut alpha: i64, mut beta: i64, ai_move_value: i64) -> (i64, i64){
+    fn min_state(&self, state: &Vec<Vec<i64>>, depth: i64, alpha: &mut i64, beta: &mut i64, ai_move_value: i64) -> (i64, i64){
         let mut v = 100000000007;
         let mut new_move: i64 = -1;
         let mut move_queue = Vec::new();
 
         for j in 0..7 {
             let temp_state_option = self.fill_map(state, j, ai_move_value);
+
+            gloo::console::log!(&format!("Min alpha: {}, Min beta: {}", alpha, beta));
 
             if let Some(temp_state) = temp_state_option {
                 let temp_val = self.value(&temp_state, depth, alpha, beta, ai_move_value);
@@ -391,11 +405,11 @@ impl Connect4Canvas {
                 }
 
                 // alpha-beta pruning
-                if v < alpha {
+                if v < *alpha {
                     new_move = self.choose(&move_queue);
                     return (v, new_move);
                 }
-                beta = std::cmp::max(beta, v);
+                *beta = std::cmp::max(*beta, v);
             }
         }
         new_move = self.choose(&move_queue);
@@ -404,8 +418,10 @@ impl Connect4Canvas {
     }
 
     pub fn ai(&mut self, ai_move_value: i64) {
+        let mut alpha : i64 = -100000000007;
+        let mut beta : i64 = 100000000007;
         let new_map = self.board.clone();
-        let val_choice = self.max_state(&new_map, 0, -100000000007, 100000000007, ai_move_value);
+        let val_choice = self.max_state(&new_map, 0, &mut alpha, &mut beta, ai_move_value);
 
         let val = val_choice.0;
         let choice = val_choice.1;
@@ -669,17 +685,17 @@ impl Component for Connect4Canvas {
 
         let difficulty = ctx.props().difficulty.clone();
 
-        // match difficulty {
-        //     Difficulty::Easy => {
-        //         gloo::console::log!("Current difficulty: Easy");
-        //     },
-        //     Difficulty::Medium=> {
-        //         gloo::console::log!("Current difficulty: Medium");
-        //     },
-        //     Difficulty::Hard => {
-        //         gloo::console::log!("Current difficulty: Hard");
-        //     }
-        // }
+        match difficulty {
+            Difficulty::Easy => {
+                gloo::console::log!("Current difficulty: Easy");
+            },
+            Difficulty::Medium=> {
+                gloo::console::log!("Current difficulty: Medium");
+            },
+            Difficulty::Hard => {
+                gloo::console::log!("Current difficulty: Hard");
+            }
+        }
 
         Self {
             props: ctx.props().clone(),
@@ -795,7 +811,7 @@ impl Component for Connect4Canvas {
     fn changed(&mut self, ctx: &Context<Self>) -> bool {
         self.props = ctx.props().clone();
 
-        // let difficulty = ctx.props().difficulty.clone();
+        let difficulty = self.props.difficulty.clone();
         // match difficulty {
         //     Difficulty::Easy => {
         //         gloo::console::log!("Current difficulty changed to: Easy");

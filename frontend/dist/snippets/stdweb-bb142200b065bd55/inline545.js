@@ -1,1 +1,1 @@
-export function __cargo_web_snippet_5205203e0ee6937de27da979149b6dc460c8dc8e(Module, $0) { var o = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (o instanceof ProgressEvent && o.type === "abort"); }
+export function __cargo_web_snippet_6fcce0aae651e2d748e085ff1f800f87625ff8c8(Module, $0) { Module.STDWEB_PRIVATE.from_js($0, (function(){return document;})()); }

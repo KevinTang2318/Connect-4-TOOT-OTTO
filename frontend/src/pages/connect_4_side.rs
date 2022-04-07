@@ -1,13 +1,9 @@
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
-//use web_sys::InputEvent;
-//use web_sys::DataTransfer;
-//use yew_stdweb::events::ChangeData;
-//use web_sys::Event;
-//use yew::virtual_dom::ListenerKind;
 use yew::{html, Component, Context, Html, NodeRef};
 use web_sys::HtmlInputElement;
 use super::connect_4_canvas::Connect4Canvas;
+use super::connect_4_canvas::Difficulty;
 
 
 pub enum Msg {
@@ -26,13 +22,6 @@ pub struct Connect4Side {
     difficulty: Difficulty,
     my_input: NodeRef,
     name_input: NodeRef,
-}
-
-#[derive(PartialEq, Copy, Clone, Debug)]
-pub enum Difficulty {
-    Easy,
-    Medium,
-    Hard,
 }
 
 impl Component for Connect4Side {

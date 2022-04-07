@@ -1,1 +1,1 @@
-export function __cargo_web_snippet_bc04f52a15f9266df42b58560c61c0334da0ada1(Module, $0) { return Module.STDWEB_PRIVATE.acquire_rust_reference( new Uint16Array( Module.STDWEB_PRIVATE.acquire_js_reference( $0 ) ) ); }
+export function __cargo_web_snippet_753e3fb7ddcac431618ae605251c0afee841820e(Module, $0) { var o = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (o instanceof Storage); }

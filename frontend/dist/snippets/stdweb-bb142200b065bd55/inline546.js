@@ -1,1 +1,1 @@
-export function __cargo_web_snippet_34c14687d9e23083c57485971b5b5b34a5e89e2a(Module, $0) { var o = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (o instanceof ProgressEvent && o.type === "loadend"); }
+export function __cargo_web_snippet_39460f92980f3787799d4ef4922d5e6aa6c3eab6(Module, $0) { var o = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (o instanceof Document); }

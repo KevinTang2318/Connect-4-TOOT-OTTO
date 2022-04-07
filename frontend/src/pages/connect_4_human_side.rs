@@ -1,14 +1,9 @@
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
-//use web_sys::InputEvent;
-//use web_sys::DataTransfer;
-//use yew_stdweb::events::ChangeData;
-//use web_sys::Event;
-//use yew::virtual_dom::ListenerKind;
 use yew::{html, Component, Context, Html, NodeRef};
 use web_sys::HtmlInputElement;
 use super::connect_4_canvas::Connect4Canvas;
-
+use super::connect_4_canvas::Difficulty;
 
 pub enum Msg {
     InsertName1(String),
@@ -24,17 +19,10 @@ pub struct Connect4HumanSide {
     disabled: bool,
     game_running: bool,
     state: String,
-    //difficulty: String,
+    difficulty: Difficulty,
     name1_input: NodeRef,
     name2_input: NodeRef,
 }
-
-/*#[derive(PartialEq, Copy, Clone, Debug)]
-pub enum Difficulty {
-    Easy,
-    Medium,
-    Hard,
-}*/
 
 impl Component for Connect4HumanSide {
     type Message = Msg;
@@ -47,7 +35,7 @@ impl Component for Connect4HumanSide {
             disabled: false,
             game_running: false,
             state: "none".to_string(),
-            //difficulty: "Easy".to_string(),
+            difficulty: Difficulty::Easy,
             name1_input: NodeRef::default(),
             name2_input: NodeRef::default(),
         }
@@ -128,12 +116,12 @@ impl Component for Connect4HumanSide {
                 <h4>{format!("New Game: {} Vs {}", self.player1_name, self.player2_name)}</h4>
                 <small disabled={!self.disabled}>{format!("(Disc Colors: {} - ", self.player1_name)} <b>{"Red"}</b> {format!("   and    {} - ", self.player2_name)} <b>{"Yellow)"}</b></small>
                 <br/>
-                /*<CanvasModel: 
+                <Connect4Canvas  
                     canvas_id = "connect_human" 
-                    player1 = self.player1.value.clone(), 
-                    player2=self.player2.value.clone(),
-                    difficulty = Easy,
-                    game_done_cbk=&self.end_game_callback/>*/
+                    player1 = {self.player1_name.clone()}
+                    player2 = {self.player2_name.clone()}
+                    difficulty = {self.difficulty}
+                    game_done_cbk={link.callback(|_| Msg::EndGame)}/>
             </div>
             </>
         }   
