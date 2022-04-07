@@ -45,20 +45,22 @@ fn files(file: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("target/deploy/").join(file)).ok()
 }
 
-#[get("/games")]
+#[get("/games/game_data")]
 fn get(collection: State<Collection<Game>>) -> Json<Vec<Game>> {
     let mut games = Vec::new();
     
-    // get all the documents in the collection
+    //get all the documents in the collection
     if let Ok(mut cursor) = collection.find(doc!{}, None) {
 
         while let Some(game) = cursor.next() {
+            // gloo::console::log!("666666666666676");
             if let Ok(game_doc) = game {
+                // gloo::console::log!(&format!("{}", game_doc.Player1Name));
                 games.push(game_doc);         //TODO: Need to check whether the game_doc here is parsed as Game correctly or is stll bson style
             }
         }
     }
-    
+
     Json(games)
 }
 

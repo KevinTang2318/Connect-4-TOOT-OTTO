@@ -16,8 +16,9 @@ use stdweb::unstable::TryInto;
 use stdweb::web::Date;
 
 
+
 // use super::connect_4_side::Difficulty;
-use super::score_board::Game;
+use super::game_history_side::Game;
 
 pub struct Connect4Canvas {
     props: GameProperty,
@@ -660,7 +661,6 @@ impl Connect4Canvas {
     }
 }
 
-// #[wasm_bindgen]
 pub async fn send_post_request(game_result:Game) -> Result<(), FetchError> {
 
     let mut opts = RequestInit::new();

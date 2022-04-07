@@ -725,6 +725,7 @@ dependencies = [
 name = "front-end"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "gloo 0.6.1",
  "gloo-utils",
  "reqwasm",
