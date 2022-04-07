@@ -127,7 +127,7 @@ impl Component for Connect4Side {
             <div style={format!("display: {}", self.state)}>
                 <br/>
                 <h4>{format!("New Game: {} Vs Computer", self.player_name)}</h4>
-                <small>{format!("(Disc Colors: {} - ", self.player_name)} <b>{"Red"}</b> {"   and    Computer - "} <b>{"Yellow)"}</b></small>
+                <small>{format!("( Disc Colors: {} - ", self.player_name)} <b>{"Red (R)"}</b> {"   and    Computer - "} <b>{"Yellow (Y) )"}</b></small>
                 <br/>
                 <Connect4Canvas  
                     canvas_id = "connect_computer" 
