@@ -2,7 +2,7 @@ use yew::prelude::*;
 use yew::virtual_dom::VNode;
 use yew_router::prelude::*;
 
-use crate::pages::scores_side::ScoresSide;
+use crate::pages::score_board_side::ScoreBoardSide;
 use crate::AppRoute;
 
 pub enum Msg {
@@ -61,7 +61,7 @@ impl Component for Scores {
                     
                 {
                     html !{
-                        <ScoresSide/>
+                        <ScoreBoardSide/>
                     }
                 }
                 </div>

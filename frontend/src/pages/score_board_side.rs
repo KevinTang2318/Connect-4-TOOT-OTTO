@@ -49,11 +49,11 @@ impl From<JsValue> for FetchError {
     }
 }
 
-pub struct ScoresSide {
+pub struct ScoreBoardSide {
     data: Option<Vec<Game>>,
 }
 
-impl ScoresSide {
+impl ScoreBoardSide {
     fn view_computer_game_statistics(&self) -> Html {
         if let Some(ref games) = self.data {
             html! {
@@ -158,7 +158,7 @@ pub async fn get_game_data() -> Result<Vec<Game>, FetchError> {
 }
 
 
-impl Component for ScoresSide {
+impl Component for ScoreBoardSide {
     type Message = Msg;
     type Properties = ();
 
@@ -175,7 +175,7 @@ impl Component for ScoresSide {
             }
         });
 
-        ScoresSide{
+        ScoreBoardSide{
             data: None
         }
     }

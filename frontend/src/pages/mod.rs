@@ -10,7 +10,7 @@ pub mod toot_otto_human_side;
 pub mod how_to_toot_side;
 
 pub mod game_history_side;
-pub mod scores_side;
+pub mod score_board_side;
 
 pub mod connect_4_canvas;
 
