@@ -58,12 +58,11 @@ impl GameHistorySide {
     fn view_data(&self) -> Html {
 
         if let Some(ref games) = self.data {
-            gloo::console::log!(&format!("Size: {}", games.len()));
             html!{
                 { games.iter().enumerate().map(|(i, game)| {
                         // Create a NaiveDateTime from the timestamp
                         let naive = NaiveDateTime::from_timestamp(game.GameDate / 1000, ((game.GameDate % 1000) as u32) * 1000000 );
-                        
+
                         // Create a normal DateTime from the NaiveDateTime
                         let datetime: DateTime<Utc> = DateTime::from_utc(naive, Utc);
                         
