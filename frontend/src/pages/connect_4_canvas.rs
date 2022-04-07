@@ -242,7 +242,7 @@ impl Connect4Canvas {
 
         self.game_result = Game {
             GameDate: Date::now() as i64,
-            gameType: String::from("Connect-466666"),
+            gameType: String::from("Connect-4"),
             gameNumber: String::new(),
             Player1Name: self.props.player1.as_ref().unwrap().clone(),
             Player2Name: self.props.player2.as_ref().unwrap().clone(),
@@ -530,8 +530,32 @@ impl Connect4Canvas {
 
         // Draw plate
         ctx.arc(x, y, 25.0, 0.0, 2.0 * 3.14159265359).unwrap();
-
         ctx.fill();
+
+        if fill_color == "#ff4136" {
+            self.draw_text_on_plate(x, y, "R");
+        }
+        else {
+            self.draw_text_on_plate(x, y, "Y");
+        }
+
+
+    }
+
+    fn draw_text_on_plate(&self, x: f64, y: f64, text: &str) {
+
+        let canvas: HtmlCanvasElement = self.canvas.cast().unwrap();
+        let ctx: CanvasRenderingContext2d = canvas
+            .get_context("2d")
+            .unwrap()
+            .unwrap()
+            .dyn_into()
+            .unwrap();
+
+        ctx.begin_path();
+        ctx.set_font("14pt sans-serif");
+        ctx.set_fill_style(&JsValue::from("#111111"));
+        ctx.fill_text(text, x - 7.0, y + 7.0);
     }
 
     // Draw the plate with animation (plate slowly dropping)
