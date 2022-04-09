@@ -59,9 +59,14 @@ impl Component for Connect4Side {
                 }
             },
             Msg::StartGame => {
-                self.game_running = true;
-                self.disabled = true;
-                self.state = "block".to_string();
+                if self.player_name != "" {
+                    self.game_running = true;
+                    self.disabled = true;
+                    self.state = "block".to_string();
+                }
+                else {
+                    gloo::console::log!("User name cannot be empty!");
+                }
             }
             Msg::EndGame => {
                 self.game_running = false;
