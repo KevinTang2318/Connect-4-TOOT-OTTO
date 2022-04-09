@@ -174,7 +174,7 @@ impl Component for TootOttoSide {
                 <TOOT_OTTO_Canvas  
                     canvas_id = "connect_computer" 
                     player1 = {self.player_name.clone()}
-                    player2 = "Computer" 
+                    player2 = "Compuer" 
                     difficulty = {self.difficulty}
                     letter = {self.letter.clone()}
                     game_done_cbk={link.callback(|_| Msg::EndGame)}/>

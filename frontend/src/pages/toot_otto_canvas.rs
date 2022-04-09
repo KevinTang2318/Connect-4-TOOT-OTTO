@@ -471,6 +471,7 @@ impl TOOT_OTTO_Canvas {
     }
 
     pub fn ai(&mut self) {
+        gloo::console::log!("AI move!");
         let mut alpha : i64 = -100000000007;
         let mut beta : i64 = 100000000007;
         let new_map = self.board.clone();
@@ -641,6 +642,7 @@ impl TOOT_OTTO_Canvas {
         }
         else {
             self.board[row][col] = self.player_move();
+            self.letter_board[row][col] = letter;
             self.current_move += 1;
             self.clear_board();
             self.draw_game();
@@ -707,6 +709,7 @@ impl TOOT_OTTO_Canvas {
     //This method resets the board for new game
     fn reset(&mut self) {
         self.board = vec![vec![0; 7]; 6];
+        self.letter_board = vec![vec!['0'; 7]; 6];
         self.current_move = 0;
         // self.paused = false;
         self.won = false;
@@ -715,6 +718,7 @@ impl TOOT_OTTO_Canvas {
         self.plate_position.col = 0;
         self.plate_position.current_pos = 0;
         self.plate_position.mode = false;
+        self.plate_position.letter = '0';
 
         self.clear_board();
         self.draw_board();
@@ -817,6 +821,7 @@ impl Component for TOOT_OTTO_Canvas {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Click(e) => {
+                gloo::console::log!("User move!");
                 if self.reject_click {
                     return false;
                 }
@@ -837,7 +842,7 @@ impl Component for TOOT_OTTO_Canvas {
                     for col in 0..7 {
                         if self.in_col(x, (75 * col + 100) as f64, 25 as f64) {
                             // self.paused = false;
-                            //changed!
+
                             if self.place_plate(col, self.letter.chars().next().unwrap(), false) == 1 {
                                 self.reject_click = true;
                             }
