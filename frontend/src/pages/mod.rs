@@ -13,5 +13,6 @@ pub mod game_history_side;
 pub mod score_board_side;
 
 pub mod connect_4_canvas;
+pub mod toot_otto_canvas;
 
 pub mod fullpage;
