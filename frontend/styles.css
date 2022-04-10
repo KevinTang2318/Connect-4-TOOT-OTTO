@@ -35,3 +35,9 @@ a {
 	padding: 5px;
 	margin: 0 auto;
 }
+
+table, th, td {
+	border: 1px solid;
+	height: 50px;
+	/* width: 50%; */
+}
