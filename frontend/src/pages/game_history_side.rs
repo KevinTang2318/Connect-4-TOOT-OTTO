@@ -168,7 +168,7 @@ impl Component for GameHistorySide {
             <h5 class="w3-xxxlarge w3-text-red"><b>{"Game History"}</b></h5>
             <hr style="width:50px;border:5px solid red" class="w3-round"/>
             <div id="game-stream">
-            <table>
+            <table border=1>
                 <tr>
                     <th>{"Game-ID"}</th>
                     <th>{"Game Type"}</th>

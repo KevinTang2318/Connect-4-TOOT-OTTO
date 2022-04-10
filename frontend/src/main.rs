@@ -3,11 +3,12 @@ use yew::prelude::*;
 use yew::virtual_dom::VNode;
 use yew_router::prelude::*;
 
+mod sidebar;
+use sidebar::SideBar;
 mod pages;
-use pages::fullpage::{welcome::Main, connect_4::Connect4, how_to_c4::HowToC4, toot_otto::TootOtto,
-                      connect_4_human::Connect4Human, toot_otto_human::TootOttoHuman, how_to_toot::HowToToot,
-                      game_history::GameHistory, scores::Scores};
-
+use crate::pages::{welcome_side::MainSide, connect_4_side::Connect4Side, how_to_c4_side::HowToC4Side, toot_otto_side::TootOttoSide,
+    connect_4_human_side::Connect4HumanSide, toot_otto_human_side::TootOttoHumanSide, how_to_toot_side::HowToTootSide,
+    game_history_side::GameHistorySide, scores_side::ScoresSide};
 
 
 pub enum Msg {
@@ -24,23 +25,23 @@ pub enum AppRoute {
     Main,
 
     #[at("/HowToConnect4")]
-    HowToC4,
+    HowToC4Side,
     #[at("/Connect4Computer")]
-    Connect4,
+    Connect4Side,
     #[at("/Connect4Human")]
-    Connect4Human,
+    Connect4HumanSide,
 
     #[at("/HowToToot")]
-    HowToToot,
+    HowToTootSide,
     #[at("/TootOttoComputer")]
-    TootOtto,
+    TootOttoSide,
     #[at("/TootOttoHuman")]
-    TootOttoHuman,
+    TootOttoHumanSide,
 
     #[at("/GameHistory")]
-    GameHistory,
+    GameHistorySide,
     #[at("/Scores")]
-    Scores,
+    ScoresSide,
    
 
 }
@@ -63,9 +64,18 @@ impl Component for AppRouter {
         html! {
             <BrowserRouter>
                 <main>
-                    <Switch<AppRoute> render={Switch::render(switch)} />
+                <>
+                    <SideBar/>
+                    {
+                        html !{
+                            <div class="w3-main" style="margin-left:390px;margin-right:40px">
+                                <Switch<AppRoute> render={Switch::render(switch)} />
+                            </div>
+                        }
+                    }    
+                </>
                 </main>
-            </BrowserRouter>
+            </BrowserRouter> 
         }
         
     }
@@ -75,20 +85,20 @@ impl Component for AppRouter {
 
 pub fn switch(routes: &AppRoute) -> Html {
     match routes.clone() {
-        AppRoute::Main => { html! { <Main/> } },
+        AppRoute::Main => { html! { <MainSide/> } },
 
-        AppRoute::HowToC4 => { html! { <HowToC4/> } },
-        AppRoute::Connect4 => { html! { <Connect4/> } },
-        AppRoute::Connect4Human => { html! { <Connect4Human/> } },
+        AppRoute::HowToC4Side => { html! { <HowToC4Side/> } },
+        AppRoute::Connect4Side => { html! { <Connect4Side/> } },
+        AppRoute::Connect4HumanSide => { html! { <Connect4HumanSide/> } },
 
-        AppRoute::HowToToot => { html! { <HowToToot/> } },
-        AppRoute::TootOtto => { html! { <TootOtto/> } },
-        AppRoute::TootOttoHuman => { html! { <TootOttoHuman/> } },
+        AppRoute::HowToTootSide => { html! { <HowToTootSide/> } },
+        AppRoute::TootOttoSide => { html! { <TootOttoSide/> } },
+        AppRoute::TootOttoHumanSide => { html! { <TootOttoHumanSide/> } },
 
-        AppRoute::GameHistory => { html! { <GameHistory/> } },
-        AppRoute::Scores => { html! { <Scores/> } },
+        AppRoute::GameHistorySide => { html! { <GameHistorySide/> } },
+        AppRoute::ScoresSide => { html! { <ScoresSide/> } },
 
-        _ => {html! { <Main/> } },
+        _ => {html! { <MainSide/> } },
     }
 }        
 

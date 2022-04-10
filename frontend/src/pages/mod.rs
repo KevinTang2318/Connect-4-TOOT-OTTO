@@ -14,4 +14,3 @@ pub mod scores_side;
 
 pub mod connect_4_canvas;
 
-pub mod fullpage;
