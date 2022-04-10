@@ -75,9 +75,16 @@ impl Component for TootOttoHumanSide {
                     
             },
             Msg::StartGame => {
-                self.game_running = true;
-                self.disabled = true;
-                self.state = "block".to_string();
+                if self.player1_name != "" && self.player2_name != ""  {
+                    if self.player2_name != "Computer" {
+                        self.game_running = true;
+                        self.disabled = true;
+                        self.state = "block".to_string();
+                    }
+                }
+                else {
+                    gloo::console::log!("Both user names cannot be empty!");
+                }
             }
             Msg::EndGame => {
                 self.game_running = false;
