@@ -1,2 +1,0 @@
-cargo:rustc-env=TYPENUM_BUILD_CONSTS=/Users/kevintang/Documents/UA/ECE_421/Group_project/3/Connect-4-TOOT-OTTO/backend/target/rls/debug/build/typenum-fdad4f6cedd3126b/out/consts.rs
-cargo:rustc-env=TYPENUM_BUILD_OP=/Users/kevintang/Documents/UA/ECE_421/Group_project/3/Connect-4-TOOT-OTTO/backend/target/rls/debug/build/typenum-fdad4f6cedd3126b/out/op.rs

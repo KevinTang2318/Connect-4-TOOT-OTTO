@@ -53,7 +53,7 @@ impl Component for SideBar {
                         <Link<AppRoute> to={AppRoute::TootOttoHumanSide}>{ "Play TOOT-OTTO With another Human" }</Link<AppRoute>>
                         <br/>
                         <Link<AppRoute> to={AppRoute::GameHistorySide}>{ "View Game History" }</Link<AppRoute>>
-                        <Link<AppRoute> to={AppRoute::ScoresSide}>{ "Score Board" }</Link<AppRoute>>
+                        <Link<AppRoute> to={AppRoute::ScoreBoardSide}>{ "Score Board" }</Link<AppRoute>>
  
                     </nav>
                     <header class="w3-container w3-top w3-hide-large w3-red w3-xlarge w3-padding">

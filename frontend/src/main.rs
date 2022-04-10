@@ -8,7 +8,7 @@ use sidebar::SideBar;
 mod pages;
 use crate::pages::{welcome_side::MainSide, connect_4_side::Connect4Side, how_to_c4_side::HowToC4Side, toot_otto_side::TootOttoSide,
     connect_4_human_side::Connect4HumanSide, toot_otto_human_side::TootOttoHumanSide, how_to_toot_side::HowToTootSide,
-    game_history_side::GameHistorySide, scores_side::ScoresSide};
+    game_history_side::GameHistorySide, score_board_side::ScoreBoardSide};
 
 
 pub enum Msg {
@@ -41,7 +41,7 @@ pub enum AppRoute {
     #[at("/GameHistory")]
     GameHistorySide,
     #[at("/Scores")]
-    ScoresSide,
+    ScoreBoardSide,
    
 
 }
@@ -96,7 +96,7 @@ pub fn switch(routes: &AppRoute) -> Html {
         AppRoute::TootOttoHumanSide => { html! { <TootOttoHumanSide/> } },
 
         AppRoute::GameHistorySide => { html! { <GameHistorySide/> } },
-        AppRoute::ScoresSide => { html! { <ScoresSide/> } },
+        AppRoute::ScoreBoardSide => { html! { <ScoreBoardSide/> } },
 
         _ => {html! { <MainSide/> } },
     }
