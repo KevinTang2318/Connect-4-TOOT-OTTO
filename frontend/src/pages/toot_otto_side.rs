@@ -172,7 +172,7 @@ impl Component for TootOttoSide {
                 <br/>
                 <br/>
                 <TOOT_OTTO_Canvas  
-                    canvas_id = "connect_computer" 
+                    canvas_id = "toot_computer" 
                     player1 = {self.player_name.clone()}
                     player2 = "Computer" 
                     difficulty = {self.difficulty}

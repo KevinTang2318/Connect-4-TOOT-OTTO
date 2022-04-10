@@ -4,6 +4,32 @@
         <title>Connect-4 &amp; TOOT-OTTO</title>
         <link rel="stylesheet" href="/styles-ab9cc9bd77e31fca.css">
     
-<link rel="preload" href="/index-264f1f47f0638985_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
-<link rel="modulepreload" href="/index-264f1f47f0638985.js"></head>
-<body><script type="module">import init from '/index-264f1f47f0638985.js';init('/index-264f1f47f0638985_bg.wasm');</script></body></html>
+<link rel="preload" href="/index-fe81f33773203f29_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
+<link rel="modulepreload" href="/index-fe81f33773203f29.js"></head>
+<body><script type="module">import init from '/index-fe81f33773203f29.js';init('/index-fe81f33773203f29_bg.wasm');</script><script>(function () {
+    var url = 'ws://' + window.location.host + '/_trunk/ws';
+    var poll_interval = 5000;
+    var reload_upon_connect = () => {
+        window.setTimeout(
+            () => {
+                // when we successfully reconnect, we'll force a
+                // reload (since we presumably lost connection to
+                // trunk due to it being killed, so it will have
+                // rebuilt on restart)
+                var ws = new WebSocket(url);
+                ws.onopen = () => window.location.reload();
+                ws.onclose = reload_upon_connect;
+            },
+            poll_interval);
+    };
+
+    var ws = new WebSocket(url);
+    ws.onmessage = (ev) => {
+        const msg = JSON.parse(ev.data);
+        if (msg.reload) {
+            window.location.reload();
+        }
+    };
+    ws.onclose = reload_upon_connect;
+})()
+</script></body></html>
