@@ -26,6 +26,7 @@ pub struct TOOT_OTTO_Canvas {
     canvas: NodeRef,
     board: Vec<Vec<i64>>,
     letter_board: Vec<Vec<char>>,
+    color_board: Vec<Vec<i64>>,
     letter: String,
     on_click_cb: Callback<MouseEvent>,
     animation_cb: Closure<dyn FnMut()>,
@@ -610,14 +611,16 @@ impl TOOT_OTTO_Canvas {
     }
 
     // Draw the plate with animation (plate slowly dropping)
-    fn draw_plate_animate(&mut self, row: usize, col: usize, current_pos: usize, mode: bool, letter: char) {
+    fn draw_plate_animate(&mut self, row: usize, col: usize, current_pos: usize, mode: bool, letter: char,) {
 
         let mut plate_color = "#99ffcc";
 
-        if self.player_move() >= 1 {
+        if self.current_move % 2 == 0 {
+            self.color_board[row][col] = 1;
             plate_color = "#99ffcc";
         }
-        else if self.player_move() <= -1  {
+        else {
+            self.color_board[row][col] = -1;
             plate_color = "#ffff99";
         }
 
@@ -643,11 +646,13 @@ impl TOOT_OTTO_Canvas {
         else {
             self.board[row][col] = self.player_move();
             self.letter_board[row][col] = letter;
-            self.current_move += 1;
+
             self.clear_board();
+            gloo::console::log!(&format!("Current move: {}", self.current_move));
             self.draw_game();
             self.draw_board();
-
+            
+            self.current_move += 1;
             self.check();
 
             // This makes sure that when we win the game, we can click the board to reset
@@ -685,16 +690,19 @@ impl TOOT_OTTO_Canvas {
                 let mut text = "";
                 let mut fill_color = "transparent";
 
-                if self.board[row][col] >= 1 && self.letter_board[row][col] == 'T' {
+                if self.color_board[row][col] == 1 && self.letter_board[row][col] == 'T' {
                     fill_color = "#99ffcc";
                     text = "T";
-                } else if self.board[row][col] >= 1 && self.letter_board[row][col] == 'O' {
+                } 
+                else if self.color_board[row][col] == 1&& self.letter_board[row][col] == 'O' {
                     fill_color = "#99ffcc";
                     text = "O";
-                } else if self.board[row][col] <= -1 && self.letter_board[row][col] == 'T' {
+                } 
+                else if self.color_board[row][col] == -1 && self.letter_board[row][col] == 'T' {
                     fill_color = "#ffff99";
                     text = "T";
-                } else if self.board[row][col] <= -1 && self.letter_board[row][col] == 'O' {
+                } 
+                else if self.color_board[row][col] == -1 && self.letter_board[row][col] == 'O' {
                     fill_color = "#ffff99";
                     text = "O";
                 }
@@ -759,6 +767,7 @@ impl Component for TOOT_OTTO_Canvas {
         let canvas_id = ctx.props().canvas_id.clone().unwrap();
         let letter = ctx.props().letter.clone();
         let mut board: Vec<Vec<i64>> = vec![vec![0; 7]; 6];
+        let mut color_board: Vec<Vec<i64>> = vec![vec![0; 7]; 6];
         let mut letter_board: Vec<Vec<char>> = vec![vec!['0'; 7]; 6];
 
         // The callback function for mouse click
@@ -792,6 +801,7 @@ impl Component for TOOT_OTTO_Canvas {
             canvas: NodeRef::default(),
             board,
             letter_board,
+            color_board,
             letter,
             on_click_cb,
             animation_cb,
