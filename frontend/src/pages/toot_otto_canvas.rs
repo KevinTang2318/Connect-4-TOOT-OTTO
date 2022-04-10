@@ -26,7 +26,7 @@ pub struct TOOT_OTTO_Canvas {
     canvas: NodeRef,
     board: Vec<Vec<i64>>,
     letter_board: Vec<Vec<char>>,
-    color_board: Vec<Vec<i64>>,
+    color_board: Vec<Vec<i64>>,  // used to record the color of each plate
     letter: String,
     on_click_cb: Callback<MouseEvent>,
     animation_cb: Closure<dyn FnMut()>,
@@ -34,7 +34,6 @@ pub struct TOOT_OTTO_Canvas {
     plate_position: PlatePosition,
     current_move: i64,
     won: bool,
-    // paused: bool,
     reject_click: bool,
     game_result: Game,
 }
@@ -97,7 +96,6 @@ impl From<JsValue> for FetchError {
 impl TOOT_OTTO_Canvas {
     //-------------------------------------------------------------- Game Algorithm -------------------------------------------------------------------- 
     //Implementation of checkState function in TootOttoComputer.js
-    // TODO: sign problem
     fn check_state(&self, state: &Vec<Vec<i64>>) -> (i64, i64) {
         let mut win_val = 0;
         let mut chain_val = 0;
@@ -105,6 +103,7 @@ impl TOOT_OTTO_Canvas {
         let mut temp_b = 0;
         let mut temp_br = 0;
         let mut temp_tr = 0;
+        let mut sign = 0;
 
         for i in 0..6 {
             for j in 0..7 {
@@ -113,8 +112,12 @@ impl TOOT_OTTO_Canvas {
                 temp_br = 0;
                 temp_tr = 0;
                 for k in 0..=3 {
-
-                    let sign: i64 = if k == 0 || k == 3 { -1 } else { 1 };
+                    if k == 0 || k == 3 {
+                        sign = -1; 
+                    } 
+                    else { 
+                        sign = 1;
+                    }
 
                     if j + k < 7 {
                         temp_r += sign * state[i][j + k];
@@ -132,6 +135,7 @@ impl TOOT_OTTO_Canvas {
                         temp_tr += sign * state[i - k][j + k];
                     }
                 }
+
                 chain_val += temp_r * temp_r * temp_r;
                 chain_val += temp_b * temp_b * temp_b;
                 chain_val += temp_br * temp_br * temp_br;
@@ -233,7 +237,6 @@ impl TOOT_OTTO_Canvas {
     }
 
     fn win(&mut self, player_value: i64) {
-        // self.paused = true;
         self.won = true;
         self.reject_click = false;
 
@@ -340,18 +343,18 @@ impl TOOT_OTTO_Canvas {
             }
             ret_val -= depth * depth;
 
-            return (ret_val);
+            return ret_val;
         }
 
         let win = val.0;
         // if already won, then return the value right away
         if win == 4 {
             // AI win, AI wants to win of course
-            return (999999 - depth * depth);
+            return 999999 - depth * depth;
         }
-        if win == -4 {
+        else if win == -4 {
             // AI lose, AI hates losing
-            return (999999 * (-1) - depth * depth);
+            return 999999 * (-1) - depth * depth;
         }
 
         if depth % 2 == 0 {
@@ -428,7 +431,7 @@ impl TOOT_OTTO_Canvas {
         let mut new_move: (i64, char) = (-1, '0');
         let mut move_queue = Vec::new();
 
-        for letter in &['T', 'O'] {
+        for letter in &['O', 'T'] {
             for j in 0..7 {
                 let mut move_value = 0;
                 if *letter == 'T' {
@@ -479,7 +482,6 @@ impl TOOT_OTTO_Canvas {
         let (val, (column, letter)) = self.max_state(&new_map, 0, &mut alpha, &mut beta);
 
 
-        // self.paused = false;
         let mut ret = self.place_plate(column as usize, letter, true);
 
         while ret < 0 {
@@ -533,7 +535,6 @@ impl TOOT_OTTO_Canvas {
 
         self.draw_plate_animate(row, col, 0, mode, letter);
 
-        // self.paused = true;
         return 1;
     }
 
@@ -717,9 +718,10 @@ impl TOOT_OTTO_Canvas {
     //This method resets the board for new game
     fn reset(&mut self) {
         self.board = vec![vec![0; 7]; 6];
+        self.color_board = vec![vec![0; 7]; 6];
         self.letter_board = vec![vec!['0'; 7]; 6];
+
         self.current_move = 0;
-        // self.paused = false;
         self.won = false;
         self.reject_click = false;
         self.plate_position.row = 0;
@@ -815,7 +817,6 @@ impl Component for TOOT_OTTO_Canvas {
             },
             current_move: 0,
             won: false,
-            // paused: false,
             reject_click: false,
             game_result: Game {
                 GameDate: Date::now() as i64,
@@ -851,7 +852,6 @@ impl Component for TOOT_OTTO_Canvas {
                     // put the plate in corresponding column
                     for col in 0..7 {
                         if self.in_col(x, (75 * col + 100) as f64, 25 as f64) {
-                            // self.paused = false;
 
                             if self.place_plate(col, self.letter.chars().next().unwrap(), false) == 1 {
                                 self.reject_click = true;
