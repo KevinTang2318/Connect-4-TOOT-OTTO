@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# remove the previous files in the target folder
+
+rm -rf target
+
 # build the front end source codes
 cd frontend && trunk build
 

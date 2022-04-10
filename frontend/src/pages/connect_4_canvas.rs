@@ -288,7 +288,7 @@ impl Connect4Canvas {
         let max_depth = match self.props.difficulty {
             Difficulty::Easy => 1,
             Difficulty::Medium => 3,
-            Difficulty::Hard => 4
+            Difficulty::Hard => 5
         };
 
         // gloo::console::log!(&format!("Max depth: {}", &max_depth));
@@ -305,11 +305,12 @@ impl Connect4Canvas {
             if win_val == 4 * ai_move_value {
                 // AI win, AI wants to win of course
                 ret_val = 999999;
-            } else if win_val == 4 * ai_move_value * -1 {
+            } 
+            else if win_val == 4 * ai_move_value * -1 {
                 // AI lose, AI hates losing
                 ret_val = 999999 * -1;
             }
-            ret_val = ret_val - depth * depth;
+            ret_val -= depth * depth;
 
             return (ret_val, -1);
         }
@@ -354,7 +355,7 @@ impl Connect4Canvas {
         for j in 0..7 {
             let temp_state_option = self.fill_map(state, j, ai_move_value);
 
-            gloo::console::log!(&format!("Max aplha: {}, Max beta: {}", alpha, beta));
+            // gloo::console::log!(&format!("Max aplha: {}, Max beta: {}", alpha, beta));
 
             if let Some(temp_state) = temp_state_option {
                 let temp_val = self.value(&temp_state, depth, alpha, beta, ai_move_value);
@@ -390,7 +391,7 @@ impl Connect4Canvas {
         for j in 0..7 {
             let temp_state_option = self.fill_map(state, j, ai_move_value);
 
-            gloo::console::log!(&format!("Min alpha: {}, Min beta: {}", alpha, beta));
+            // gloo::console::log!(&format!("Min alpha: {}, Min beta: {}", alpha, beta));
 
             if let Some(temp_state) = temp_state_option {
                 let temp_val = self.value(&temp_state, depth, alpha, beta, ai_move_value);
@@ -410,7 +411,7 @@ impl Connect4Canvas {
                     new_move = self.choose(&move_queue);
                     return (v, new_move);
                 }
-                *beta = std::cmp::max(*beta, v);
+                *beta = std::cmp::min(*beta, v);
             }
         }
         new_move = self.choose(&move_queue);
@@ -836,17 +837,17 @@ impl Component for Connect4Canvas {
         self.props = ctx.props().clone();
 
         let difficulty = self.props.difficulty.clone();
-        // match difficulty {
-        //     Difficulty::Easy => {
-        //         gloo::console::log!("Current difficulty changed to: Easy");
-        //     },
-        //     Difficulty::Medium=> {
-        //         gloo::console::log!("Current difficulty changed to: Medium");
-        //     },
-        //     Difficulty::Hard => {
-        //         gloo::console::log!("Current difficulty changed to: Hard");
-        //     }
-        // }
+        match difficulty {
+            Difficulty::Easy => {
+                gloo::console::log!("Current difficulty changed to: Easy");
+            },
+            Difficulty::Medium=> {
+                gloo::console::log!("Current difficulty changed to: Medium");
+            },
+            Difficulty::Hard => {
+                gloo::console::log!("Current difficulty changed to: Hard");
+            }
+        }
 
         true
     }

@@ -51,9 +51,19 @@ impl Component for Connect4HumanSide {
                 self.player2_name = name;
             },
             Msg::StartGame => {
-                self.game_running = true;
-                self.disabled = true;
-                self.state = "block".to_string();
+                if self.player1_name != "" && self.player2_name != "" {
+                    if self.player2_name != "Computer" {
+                        self.game_running = true;
+                        self.disabled = true;
+                        self.state = "block".to_string();
+                    }
+                    else {
+                        gloo::console::log!("Second play's name cannot be Computer!");
+                    }
+                }
+                else {
+                    gloo::console::log!("Both user names cannot be empty!");
+                }
             }
             Msg::EndGame => {
                 self.game_running = false;

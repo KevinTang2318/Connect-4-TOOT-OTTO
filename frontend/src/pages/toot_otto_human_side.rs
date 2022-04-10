@@ -7,7 +7,8 @@ use yew::virtual_dom::VNode;
 //use yew::virtual_dom::ListenerKind;
 use yew::{html, Component, Context, Html, NodeRef};
 use web_sys::HtmlInputElement;
-use super::connect_4_canvas::Connect4Canvas;
+use super::toot_otto_canvas::TOOT_OTTO_Canvas;
+use super::toot_otto_canvas::Difficulty;
 
 
 pub enum Msg {
@@ -26,18 +27,11 @@ pub struct TootOttoHumanSide {
     disabled: bool,
     game_running: bool,
     state: String,
-    //difficulty: String,
     name1_input: NodeRef,
     name2_input: NodeRef,
     letter_input: NodeRef,
 }
 
-/*#[derive(PartialEq, Copy, Clone, Debug)]
-pub enum Difficulty {
-    Easy,
-    Medium,
-    Hard,
-}*/
 
 impl Component for TootOttoHumanSide {
     type Message = Msg;
@@ -51,7 +45,6 @@ impl Component for TootOttoHumanSide {
             disabled: false,
             game_running: false,
             state: "none".to_string(),
-            //difficulty: "Easy".to_string(),
             name1_input: NodeRef::default(),
             name2_input: NodeRef::default(),
             letter_input: NodeRef::default(),
@@ -82,9 +75,16 @@ impl Component for TootOttoHumanSide {
                     
             },
             Msg::StartGame => {
-                self.game_running = true;
-                self.disabled = true;
-                self.state = "block".to_string();
+                if self.player1_name != "" && self.player2_name != ""  {
+                    if self.player2_name != "Computer" {
+                        self.game_running = true;
+                        self.disabled = true;
+                        self.state = "block".to_string();
+                    }
+                }
+                else {
+                    gloo::console::log!("Both user names cannot be empty!");
+                }
             }
             Msg::EndGame => {
                 self.game_running = false;
@@ -157,13 +157,13 @@ impl Component for TootOttoHumanSide {
                 <h4>{format!("Letter is {}",self.letter)}</h4>
                 <br/>
                 <br/>
-                /*<TootCanvasModel: 
-                    canvas_id="toot_human" 
-                    player1 = self.player1.value.clone(), 
-                    player2=self.player2.value.clone(),
-                    difficulty = Easy,
-                    letter=self.letter.clone(), 
-                    game_done_cbk=&self.end_game_callback/>*/
+                <TOOT_OTTO_Canvas  
+                    canvas_id = "toot_human" 
+                    player1 = {self.player1_name.clone()}
+                    player2 = {self.player2_name.clone()}
+                    difficulty = {Difficulty::Easy}
+                    letter = {self.letter.clone()}
+                    game_done_cbk={link.callback(|_| Msg::EndGame)}/>
             </div>
             <br/>
             </>

@@ -2,6 +2,7 @@
 #[macro_use] extern crate rocket;
 
 use rocket::response::NamedFile;
+use rocket::response::Redirect;
 use rocket::State;
 use std::path::{Path, PathBuf};
 use bson::{bson, Bson};
@@ -39,6 +40,47 @@ fn index() -> Option<NamedFile> {
     NamedFile::open(Path::new("target/deploy/index.html")).ok()
 }
 
+// Path redirections, used for handling exceptional cases
+#[get("/GameHistory")]
+fn game_history_redirect() -> Redirect {
+    Redirect::to("/")
+}
+
+#[get("/HowToConnect4")]
+fn how_to_c4_redirect() -> Redirect {
+    Redirect::to("/")
+}
+
+#[get("/Connect4Computer")]
+fn c4_computer_redirect() -> Redirect {
+    Redirect::to("/")
+}
+
+#[get("/Connect4Human")]
+fn c4_human_redirect() -> Redirect {
+    Redirect::to("/")
+}
+
+#[get("/HowToToot")]
+fn how_to_tt_redirect() -> Redirect {
+    Redirect::to("/")
+}
+
+#[get("/TootOttoComputer")]
+fn tt_computer_redirect() -> Redirect {
+    Redirect::to("/")
+}
+
+#[get("/TootOttoHuman")]
+fn tt_human_redirect() -> Redirect {
+    Redirect::to("/")
+}
+
+#[get("/Scores")]
+fn scores_redirect() -> Redirect {
+    Redirect::to("/")
+}
+
 // routing for static files
 #[get("/<file..>")]
 fn files(file: PathBuf) -> Option<NamedFile> {
@@ -53,10 +95,8 @@ fn get(collection: State<Collection<Game>>) -> Json<Vec<Game>> {
     if let Ok(mut cursor) = collection.find(doc!{}, None) {
 
         while let Some(game) = cursor.next() {
-            // gloo::console::log!("666666666666676");
             if let Ok(game_doc) = game {
-                // gloo::console::log!(&format!("{}", game_doc.Player1Name));
-                games.push(game_doc);         //TODO: Need to check whether the game_doc here is parsed as Game correctly or is stll bson style
+                games.push(game_doc);        
             }
         }
     }
@@ -81,11 +121,10 @@ fn rocket() -> Result<rocket::Rocket, mongodb::error::Error> {
                         .collection::<Game>("games");
 
 
-    Ok(rocket::ignite().manage(collection).mount("/", routes![index, files, get, post]))
+    Ok(rocket::ignite().manage(collection).mount("/", routes![index, files, get, post, game_history_redirect, how_to_c4_redirect, c4_computer_redirect, c4_human_redirect, how_to_tt_redirect, tt_computer_redirect, tt_human_redirect, scores_redirect]))
 }
 
 fn main() {
-    // rocket::ignite().mount("/", routes![index]).launch();
     match rocket() {
         Ok(rocket) => {
             let ret = rocket.launch();

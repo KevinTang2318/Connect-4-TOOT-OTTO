@@ -7,6 +7,8 @@ use yew::virtual_dom::VNode;
 //use yew::virtual_dom::ListenerKind;
 use yew::{html, Component, Context, Html, NodeRef};
 use web_sys::HtmlInputElement;
+use super::toot_otto_canvas::TOOT_OTTO_Canvas;
+use super::toot_otto_canvas::Difficulty;
 
 
 
@@ -22,7 +24,7 @@ pub enum Msg {
 
 pub struct TootOttoSide {
     player_name: String,
-    difficulty: String,
+    difficulty: Difficulty,
     letter: String,
     disabled: bool,
     game_running: bool,
@@ -42,7 +44,7 @@ impl Component for TootOttoSide {
     fn create(_ctx: &Context<Self>) -> Self {
         TootOttoSide{
             player_name: "".to_string(),
-            difficulty: "Easy".to_string(),
+            difficulty: Difficulty::Easy,
             letter: "T".to_string(),
             disabled: false,
             game_running: false,
@@ -62,12 +64,26 @@ impl Component for TootOttoSide {
         
             },
             Msg::ChooseDifficulty(difficulty) => {
-                self.difficulty = difficulty;
+                // self.difficulty = difficulty;
+                if difficulty == "Hard" {
+                    self.difficulty = Difficulty::Hard;
+                }
+                else if difficulty == "Medium" {
+                    self.difficulty = Difficulty::Medium;
+                }
+                else {
+                    self.difficulty = Difficulty::Easy;
+                }
             },
             Msg::StartGame => {
-                self.game_running = true;
-                self.disabled = true;
-                self.state = "block".to_string();
+                if self.player_name != "" {
+                    self.game_running = true;
+                    self.disabled = true;
+                    self.state = "block".to_string();
+                }
+                else {
+                    gloo::console::log!("User name cannot be empty!");
+                }
             },
             Msg::EndGame => {
                 self.game_running = false;
@@ -151,10 +167,6 @@ impl Component for TootOttoSide {
             <div style={format!("display: {}", self.state)}>
                 <br/>
                 <h4>{format!("New Game: {} Vs Computer", self.player_name)}</h4>
-                //
-                //Just to see difficulty is updating
-                <h4>{format!("Difficulty: {}", self.difficulty)}</h4>
-                //
                 <small>{format!("(Winning Combination: {} - ", self.player_name)} <b>{"TOOT"}</b> {"   and    Computer - "} <b>{"OTTO)"}</b></small>
                 {" Select a Disc Type:  "}
                 <input ref={self.letter_input.clone()} onclick = {link.callback(|_| Msg::InputChanged)} type="radio" name="letter" value="T" checked={self.letter == "T".to_string()}/>
@@ -164,13 +176,13 @@ impl Component for TootOttoSide {
                 <h4>{format!("Letter is {}",self.letter)}</h4>
                 <br/>
                 <br/>
-                /*<CanvasModel  
-                    canvas_id = "connect_computer" 
-                    player1 = self.player_name.clone()
+                <TOOT_OTTO_Canvas  
+                    canvas_id = "toot_computer" 
+                    player1 = {self.player_name.clone()}
                     player2 = "Computer" 
-                    difficulty = self.difficulty
-                    letter=self.letter.clone()
-                    game_done_cbk={link.callback(|_| Msg::EndGame)}/>*/
+                    difficulty = {self.difficulty}
+                    letter = {self.letter.clone()}
+                    game_done_cbk={link.callback(|_| Msg::EndGame)}/>
             </div>
             </>
         }
